@@ -18,7 +18,7 @@ from skfp.fingerprints import ECFPFingerprint
 
 # LOSSES AND METRICS
 
-@keras.saving.register_keras_serializable(package='belka', name='MultiLabelLoss')
+# @keras.saving.register_keras_serializable(package='belka', name='MultiLabelLoss')
 class MultiLabelLoss(keras.losses.Loss):
     """
     Macro- or Micro-averaged Weighted Masked Binary Focal loss.
@@ -79,7 +79,7 @@ class MultiLabelLoss(keras.losses.Loss):
         return cls(**config)
 
 
-@keras.saving.register_keras_serializable(package='belka', name='CategoricalLoss')
+# @keras.saving.register_keras_serializable(package='belka', name='CategoricalLoss')
 class CategoricalLoss(keras.losses.Loss):
     """
     Masked Categorical Focal loss.
@@ -141,7 +141,7 @@ class CategoricalLoss(keras.losses.Loss):
         return cls(**config)
 
 
-@keras.saving.register_keras_serializable(package='belka', name='BinaryLoss')
+# @keras.saving.register_keras_serializable(package='belka', name='BinaryLoss')
 class BinaryLoss(keras.losses.Loss):
     """
     Binary Focal loss.
@@ -167,7 +167,7 @@ class BinaryLoss(keras.losses.Loss):
         return cls(**config)
 
 
-@keras.saving.register_keras_serializable(package='belka', name='MaskedAUC')
+# @keras.saving.register_keras_serializable(package='belka', name='MaskedAUC')
 class MaskedAUC(keras.metrics.AUC):
     """
     Masked AUC metric for different training modes.
@@ -254,7 +254,7 @@ class FPGenerator(tf.keras.layers.Layer):
         return x
 
 
-@keras.saving.register_keras_serializable(package='belka', name='Encodings')
+# @keras.saving.register_keras_serializable(package='belka', name='Encodings')
 class Encodings(keras.layers.Layer):
     """
     Positional encoding layer for transformer architecture.
@@ -298,7 +298,7 @@ class Encodings(keras.layers.Layer):
         return cls(**config)
 
 
-@keras.saving.register_keras_serializable(package='belka', name='Embeddings')
+# @keras.saving.register_keras_serializable(package='belka', name='Embeddings')
 class Embeddings(tf.keras.layers.Layer):
     """
     Embedding layer with positional encodings.
@@ -335,7 +335,7 @@ class Embeddings(tf.keras.layers.Layer):
         return cls(**config)
 
 
-@keras.saving.register_keras_serializable(package='belka', name='FeedForward')
+# @keras.saving.register_keras_serializable(package='belka', name='FeedForward')
 class FeedForward(tf.keras.layers.Layer):
     """
     Feed-forward network with pre-layer normalization.
@@ -376,7 +376,7 @@ class FeedForward(tf.keras.layers.Layer):
         return cls(**config)
 
 
-@keras.saving.register_keras_serializable(package='belka', name='SelfAttention')
+# @keras.saving.register_keras_serializable(package='belka', name='SelfAttention')
 class SelfAttention(tf.keras.layers.Layer):
     """
     Self-Attention block with PRE-layer normalization
@@ -434,7 +434,7 @@ class SelfAttention(tf.keras.layers.Layer):
         return cls(**config)
 
 
-@keras.saving.register_keras_serializable(package='belka', name='EncoderLayer')
+# @keras.saving.register_keras_serializable(package='belka', name='EncoderLayer')
 class EncoderLayer(tf.keras.layers.Layer):
     """
     Encoder layer with PRE-layer normalization: LayerNorm -> Self-Attention -> LayerNorm -> FeedForward.
@@ -478,7 +478,7 @@ class EncoderLayer(tf.keras.layers.Layer):
 
 # MODEL DEFINITION
 
-@keras.saving.register_keras_serializable(package='belka', name='Belka')
+# @keras.saving.register_keras_serializable(package='belka', name='Belka')
 class Belka(tf.keras.Model):
     """
     Belka transformer model for molecular binding affinity prediction.

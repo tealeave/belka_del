@@ -20,7 +20,7 @@ echo "Start time: $(date)"
 echo "=============================================="
 
 # Environment setup
-module load python/3.9
+module load python/3.10.2
 module load cuda/11.8
 module load cudnn/8.6
 

@@ -17,16 +17,16 @@ import os
 from typing import Union
 
 # Import from new modular structure
-from .belka_utils import (
+from belka_utils import (
     MultiLabelLoss, CategoricalLoss, BinaryLoss, MaskedAUC,
     FPGenerator, Encodings, Embeddings, FeedForward, SelfAttention, EncoderLayer,
     Belka, load_model
 )
-from .data_processing import (
+from data_processing import (
     read_parquet, make_parquet, make_parquet_memory_safe, get_vocab, 
     get_smiles_encoder, make_dataset, train_val_datasets, initialize_mapply
 )
-from .training import train_model, make_submission
+from training import train_model, make_submission
 
 
 # BACKWARD COMPATIBILITY FUNCTIONS

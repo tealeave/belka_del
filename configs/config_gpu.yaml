@@ -179,17 +179,15 @@ paths:
   model_dir: "/pub/ddlin/projects/belka_del/models"
   checkpoint_dir: "/pub/ddlin/projects/belka_del/checkpoints"
   results_dir: "/pub/ddlin/projects/belka_del/results"
-  shared_storage: "/shared/projects/belka_del"  # Shared between clusters
-  staging_dir: "/shared/projects/belka_del/staging"  # Input from CPU cluster
+  processed_data: "/pub/ddlin/projects/belka_del/data/processed"  # Local processed data
   
-# Data Input Configuration (CPU → GPU handoff)
+# Data Input Configuration (Local files)
 input:
   enabled: true
-  source: "staging"           # Read from staging directory
+  source: "local"             # Read from local data/raw directory
   validation:
-    checksum: true            # Verify file integrity using checksums
     size_check: true          # Verify file sizes
-    completion_marker: true   # Check for completion marker
+    file_existence: true      # Check files exist locally
   required_files:
     - "belka.parquet"
     - "vocab.txt"

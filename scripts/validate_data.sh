@@ -1,17 +1,19 @@
 #!/bin/bash
 
 # Belka Transformer - Data Validation Utility
-# Validates data integrity and readiness in shared storage
-# NO LIVE TRANSFERS - Only validates saved data
+# Validates data integrity and readiness in local repository
+# Validates locally stored data files
 
 echo "=============================================="
 echo "Belka Transformer - Data Validation Utility"
 echo "=============================================="
 
-# Configuration - MODIFY THESE FOR YOUR HPC SETUP
-SHARED_STORAGE="/shared/projects/belka_del"
-STAGING_DIR="$SHARED_STORAGE/staging"
-RESULTS_DIR="$SHARED_STORAGE/results"
+# Configuration - Local repository paths
+PROJECT_DIR="/pub/ddlin/projects/belka_del"
+DATA_DIR="$PROJECT_DIR/data/raw"
+MODELS_DIR="$PROJECT_DIR/models"
+RESULTS_DIR="$PROJECT_DIR/results"
+CHECKPOINTS_DIR="$PROJECT_DIR/checkpoints"
 
 # Validation mode
 VALIDATION_MODE=${1:-cpu_output}
@@ -24,55 +26,52 @@ if [[ "$VALIDATION_MODE" != "cpu_output" && "$VALIDATION_MODE" != "gpu_output" &
 fi
 
 echo "Validation mode: $VALIDATION_MODE"
-echo "Shared storage: $SHARED_STORAGE"
+echo "Project directory: $PROJECT_DIR"
 
 case $VALIDATION_MODE in
     "cpu_output")
         echo "Validating CPU preprocessing outputs..."
         
-        # Check if completion marker exists
-        echo "Checking CPU preprocessing completion..."
-        if [ ! -f "$STAGING_DIR/cpu_processing_complete.marker" ]; then
-            echo "ERROR: CPU processing completion marker not found"
-            echo "Expected: $STAGING_DIR/cpu_processing_complete.marker"
+        # Check if required files exist locally
+        echo "Checking CPU preprocessing outputs..."
+        if [ ! -f "$DATA_DIR/belka.parquet" ] || [ ! -f "$DATA_DIR/vocab.txt" ]; then
+            echo "ERROR: Required preprocessing files not found"
+            echo "Expected files:"
+            echo "  - $DATA_DIR/belka.parquet"
+            echo "  - $DATA_DIR/vocab.txt"
             echo ""
             echo "CPU preprocessing must complete first. Run:"
             echo "sbatch slurm/job_cpu_preprocess.sh"
             exit 1
         fi
         
-        echo "✓ CPU preprocessing completion marker found"
-        echo "Completion marker contents:"
-        cat "$STAGING_DIR/cpu_processing_complete.marker"
-        echo ""
+        echo "✓ CPU preprocessing output files found locally"
         
         # Required files from CPU preprocessing
-        REQUIRED_FILES=("belka.parquet" "vocab.txt" "belka.parquet.sha256" "vocab.txt.sha256")
+        REQUIRED_FILES=("belka.parquet" "vocab.txt")
         
-        # Check if files exist
+        # Check if files exist and get information
         echo "Verifying required files exist..."
         for file in "${REQUIRED_FILES[@]}"; do
-            if [ ! -f "$STAGING_DIR/$file" ]; then
-                echo "ERROR: Required file not found: $STAGING_DIR/$file"
-                echo "CPU preprocessing may have failed or files were not properly saved"
+            if [ ! -f "$DATA_DIR/$file" ]; then
+                echo "ERROR: Required file not found: $DATA_DIR/$file"
+                echo "CPU preprocessing may have failed"
                 exit 1
             fi
         done
-        echo "✓ All required files found in staging area"
+        echo "✓ All required files found locally"
         
-        # Verify data integrity using checksums
-        echo "Verifying data integrity..."
-        cd $STAGING_DIR
-        
-        if sha256sum -c belka.parquet.sha256; then
-            echo "✓ belka.parquet integrity verified"
+        # Verify basic file integrity (non-empty, readable)
+        echo "Verifying file integrity..."
+        if [ -s "$DATA_DIR/belka.parquet" ] && [ -r "$DATA_DIR/belka.parquet" ]; then
+            echo "✓ belka.parquet is accessible and non-empty"
         else
             echo "✗ belka.parquet integrity check failed"
             exit 1
         fi
         
-        if sha256sum -c vocab.txt.sha256; then
-            echo "✓ vocab.txt integrity verified"
+        if [ -s "$DATA_DIR/vocab.txt" ] && [ -r "$DATA_DIR/vocab.txt" ]; then
+            echo "✓ vocab.txt is accessible and non-empty"
         else
             echo "✗ vocab.txt integrity check failed"
             exit 1
@@ -81,8 +80,8 @@ case $VALIDATION_MODE in
         # Display file information
         echo ""
         echo "File information:"
-        echo "- belka.parquet: $(du -h belka.parquet | cut -f1)"
-        echo "- vocab.txt: $(du -h vocab.txt | cut -f1) ($(wc -l < vocab.txt) tokens)"
+        echo "- belka.parquet: $(du -h $DATA_DIR/belka.parquet | cut -f1)"
+        echo "- vocab.txt: $(du -h $DATA_DIR/vocab.txt | cut -f1) ($(wc -l < $DATA_DIR/vocab.txt) tokens)"
         
         echo ""
         echo "✓ CPU output validation successful"
@@ -93,51 +92,53 @@ case $VALIDATION_MODE in
     "gpu_output")
         echo "Validating GPU training outputs..."
         
-        # Check if GPU training completed
+        # Check if GPU training completed by looking for model files
         echo "Checking GPU training completion..."
-        if [ ! -f "$SHARED_STORAGE/gpu_training_complete.marker" ]; then
-            echo "ERROR: GPU training completion marker not found"
-            echo "Expected: $SHARED_STORAGE/gpu_training_complete.marker"
+        MODEL_COUNT=$(find "$PROJECT_DIR" -name "*.keras" 2>/dev/null | wc -l)
+        if [ $MODEL_COUNT -eq 0 ]; then
+            echo "ERROR: No trained model files found"
+            echo "Expected: *.keras files in project directory"
             echo ""
             echo "GPU training must complete first. Run:"
             echo "sbatch slurm/job_gpu_training.sh [clf|fps|mlm]"
             exit 1
         fi
         
-        echo "✓ GPU training completion marker found"
-        echo "Completion marker contents:"
-        cat "$SHARED_STORAGE/gpu_training_complete.marker"
-        echo ""
+        echo "✓ Found $MODEL_COUNT trained model file(s)"
         
-        # Check results directory
-        if [ ! -d "$RESULTS_DIR" ]; then
-            echo "ERROR: Results directory not found: $RESULTS_DIR"
-            exit 1
+        # Check for output directories and files
+        echo "Checking output directories..."
+        if [ -d "$MODELS_DIR" ]; then
+            echo "✓ Models directory found: $MODELS_DIR"
         fi
-        
-        echo "Results directory contents:"
-        ls -la "$RESULTS_DIR/"
+        if [ -d "$CHECKPOINTS_DIR" ]; then
+            echo "✓ Checkpoints directory found: $CHECKPOINTS_DIR"
+        fi
+        if [ -d "$RESULTS_DIR" ]; then
+            echo "✓ Results directory found: $RESULTS_DIR"
+            echo "Results directory contents:"
+            ls -la "$RESULTS_DIR/" 2>/dev/null || echo "(empty)"
+        fi
         
         # Check for submission file
-        SUBMISSION_FILE=$(find "$RESULTS_DIR" -name "submission_*.csv" | head -1)
-        if [ -n "$SUBMISSION_FILE" ]; then
-            echo "✓ Submission file found: $SUBMISSION_FILE"
-            echo "Submission file size: $(du -h "$SUBMISSION_FILE" | cut -f1)"
-            echo "Submission entries: $(wc -l < "$SUBMISSION_FILE") lines"
+        if [ -f "$DATA_DIR/submission.csv" ]; then
+            echo "✓ Submission file found: $DATA_DIR/submission.csv"
+            echo "Submission file size: $(du -h "$DATA_DIR/submission.csv" | cut -f1)"
+            echo "Submission entries: $(wc -l < "$DATA_DIR/submission.csv") lines"
             echo ""
             echo "Submission preview:"
-            head -5 "$SUBMISSION_FILE"
+            head -5 "$DATA_DIR/submission.csv"
         else
-            echo "⚠ No submission file found in results"
+            echo "⚠ No submission file found in data/raw/"
         fi
         
-        # Check for model files
-        MODEL_FILES=$(find "$RESULTS_DIR" -name "*.keras" | wc -l)
+        # Check for model files throughout project
+        MODEL_FILES=$(find "$PROJECT_DIR" -name "*.keras" | wc -l)
         if [ $MODEL_FILES -gt 0 ]; then
             echo "✓ Found $MODEL_FILES model file(s)"
-            find "$RESULTS_DIR" -name "*.keras" -exec du -h {} \;
+            find "$PROJECT_DIR" -name "*.keras" -exec du -h {} \;
         else
-            echo "⚠ No model files found in results"
+            echo "⚠ No model files found in project"
         fi
         
         echo ""
@@ -180,7 +181,7 @@ case $VALIDATION_MODE in
         if [ $CPU_STATUS -eq 0 ] && [ $GPU_STATUS -eq 0 ]; then
             echo ""
             echo "🎉 Full pipeline validation successful!"
-            echo "All data properly saved and validated in shared storage"
+            echo "All data properly saved and validated in local repository"
         else
             echo ""
             echo "❌ Pipeline validation failed"

@@ -17,16 +17,16 @@ from typing import Dict, Any, Optional
 import platform
 import psutil
 
-# Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
+# Add project root to path to enable package imports
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 try:
-    from data_processing import (
+    from src.data_processing import (
         make_parquet, make_parquet_memory_safe, get_vocab, make_dataset,
         create_validation_dataset, initialize_mapply
     )
-    from training import train_model, evaluate_model, make_submission, save_training_config
-    from belka_utils import load_model
+    from src.training import train_model, evaluate_model, make_submission, save_training_config
+    from src.belka_utils import load_model
 except ImportError as e:
     print(f"Error importing modules: {e}")
     print("Make sure you're running from the project root directory")

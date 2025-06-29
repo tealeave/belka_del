@@ -1,0 +1,34 @@
+==============================================
+Belka Transformer - CPU Cluster Preprocessing
+Job ID: 39985794
+Node: hpc3-15-21
+Start time: Sun Jun 29 11:06:46 PDT 2025
+==============================================
+Activating Poetry virtual environment...
+Using Python: /dfs6/pub/ddlin/projects/belka_del/.venv/bin/python
+Python version: Python 3.10.12
+Poetry version: Poetry (version 2.1.2)
+Current directory: /pub/ddlin/projects/belka_del
+Available CPU cores: 16
+Allocated memory: 65536MB
+Processing locally within repository
+Checking for required input files...
+All required input files found.
+Cleaning previous processed data...
+Starting preprocessing pipeline...
+Step: preprocess (CPU cluster optimized)
+2025-06-29 11:07:02,017 - root - INFO - Logging to file: logs/cpu_preprocess_39985794.log
+2025-06-29 11:07:02,017 - root - INFO - Using cluster-specific config: configs/config_cpu.yaml
+2025-06-29 11:07:02,031 - root - INFO - Configuration loaded from: configs/config_cpu.yaml
+2025-06-29 11:07:02,031 - root - INFO - Cluster compatibility validation passed for cpu cluster
+2025-06-29 11:07:02,031 - root - INFO - Working directory: /pub/ddlin/projects/belka_del/data/raw
+2025-06-29 11:07:02,031 - root - INFO - Step: Preprocess (CPU Cluster - Steps 1-2)
+2025-06-29 11:07:02,031 - root - INFO - Step: Generate Parquet Data
+Mapply initialized with 16 workers
+2025-06-29 11:07:02,031 - root - INFO - Using memory-safe parquet generation
+Processing subsets and saving to temporary files...
+Processing 'test' subset...
+Saved temporary file: /pub/ddlin/projects/belka_del/data/raw/temp_parquet/subset_0.parquet
+Processing 'extra' subset...
+✗ Preprocessing failed with exit code 1
+Check logs/cpu_preprocess_39985794.log for details

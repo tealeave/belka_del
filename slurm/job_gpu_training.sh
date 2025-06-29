@@ -22,7 +22,7 @@ echo "Start time: $(date)"
 echo "=============================================="
 
 # Environment setup
-module load python/3.9    # Adjust based on your system
+module load python/3.10.2
 module load cuda/11.8     # Adjust CUDA version as needed
 module load cudnn/8.6     # Adjust cuDNN version as needed
 
@@ -47,15 +47,12 @@ export TF_GPU_MEMORY_ALLOCATION=cuda_malloc_async
 PROJECT_DIR="/pub/ddlin/projects/belka_del"
 cd $PROJECT_DIR
 
-# Shared storage paths (must match CPU cluster configuration)
-SHARED_STORAGE="/shared/projects/belka_del"
-STAGING_DIR="$SHARED_STORAGE/staging"
+# All processing uses local repository files
 
 echo "Current directory: $(pwd)"
 echo "Available CPU cores: $SLURM_CPUS_PER_TASK"
 echo "Allocated memory: ${SLURM_MEM_PER_NODE}MB"
-echo "Shared storage: $SHARED_STORAGE"
-echo "Staging directory: $STAGING_DIR"
+echo "Processing locally from data/raw/ directory"
 
 # GPU information
 echo "GPU Information:"
@@ -82,69 +79,30 @@ fi
 
 # Check for CPU preprocessing completion
 echo "Checking for CPU preprocessing completion..."
-if [ ! -f "$STAGING_DIR/cpu_processing_complete.marker" ]; then
-    echo "ERROR: CPU processing completion marker not found"
-    echo "Expected: $STAGING_DIR/cpu_processing_complete.marker"
+if [ ! -f "data/raw/belka.parquet" ] || [ ! -f "data/raw/vocab.txt" ]; then
+    echo "ERROR: Required preprocessing files not found"
+    echo "Expected files:"
+    echo "  - data/raw/belka.parquet"
+    echo "  - data/raw/vocab.txt"
     echo ""
     echo "CPU preprocessing must complete first. Run:"
     echo "sbatch slurm/job_cpu_preprocess.sh"
-    echo ""
-    echo "Or check if staging directory path is correct:"
-    echo "STAGING_DIR=$STAGING_DIR"
     exit 1
 fi
 
-echo "✓ CPU processing completion marker found"
-echo "Completion marker contents:"
-cat "$STAGING_DIR/cpu_processing_complete.marker"
-echo ""
+echo "✓ CPU preprocessing files found locally"
 
-# Verify required input files from CPU preprocessing
-echo "Checking for required input files from CPU preprocessing..."
-REQUIRED_FILES=("belka.parquet" "vocab.txt" "belka.parquet.sha256" "vocab.txt.sha256")
-
-for file in "${REQUIRED_FILES[@]}"; do
-    if [ ! -f "$STAGING_DIR/$file" ]; then
-        echo "ERROR: Required file not found: $STAGING_DIR/$file"
-        echo "CPU preprocessing may have failed or files were not properly staged"
-        exit 1
-    fi
-done
-
-echo "✓ All required files found in staging area"
-
-# Verify data integrity using checksums
-echo "Verifying data integrity..."
-cd $STAGING_DIR
-
-if sha256sum -c belka.parquet.sha256; then
-    echo "✓ belka.parquet integrity verified"
-else
-    echo "✗ belka.parquet integrity check failed"
-    exit 1
-fi
-
-if sha256sum -c vocab.txt.sha256; then
-    echo "✓ vocab.txt integrity verified"
-else
-    echo "✗ vocab.txt integrity check failed"
-    exit 1
-fi
-
-cd $PROJECT_DIR
-
-# Copy files from staging to local working directory
-echo "Copying files from staging to local working directory..."
-cp "$STAGING_DIR/belka.parquet" data/raw/
-cp "$STAGING_DIR/vocab.txt" data/raw/
-
-# Verify local copies
+# Verify required input files are available locally
+echo "Verifying required input files..."
 if [ ! -f "data/raw/belka.parquet" ] || [ ! -f "data/raw/vocab.txt" ]; then
-    echo "ERROR: Failed to copy files from staging to local directory"
+    echo "ERROR: Required files not found in data/raw/"
+    echo "Expected files:"
+    echo "  - data/raw/belka.parquet"
+    echo "  - data/raw/vocab.txt"
     exit 1
 fi
 
-echo "✓ Files successfully copied to local working directory"
+echo "✓ All required files found locally"
 echo "Local file sizes:"
 echo "- belka.parquet: $(du -h data/raw/belka.parquet | cut -f1)"
 echo "- vocab.txt: $(du -h data/raw/vocab.txt | cut -f1) ($(wc -l < data/raw/vocab.txt) tokens)"
@@ -213,27 +171,14 @@ if [ $? -eq 0 ]; then
             echo "✗ Submission generation failed"
         fi
         
-        # Save results to shared storage
-        echo "Saving results to shared storage..."
-        mkdir -p $SHARED_STORAGE/results
-        cp "$LATEST_MODEL" $SHARED_STORAGE/results/
+        # Results are already saved locally in the repository
+        echo "Training results saved locally:"
+        echo "- Model: $LATEST_MODEL"
+        echo "- Models directory: models/"
+        echo "- Checkpoints directory: checkpoints/"
         if [ -f "data/raw/submission.csv" ]; then
-            cp data/raw/submission.csv $SHARED_STORAGE/results/submission_${SLURM_JOB_ID}.csv
+            echo "- Submission: data/raw/submission.csv"
         fi
-        cp -r models checkpoints $SHARED_STORAGE/results/ 2>/dev/null || true
-        
-        # Create completion marker
-        cat > $SHARED_STORAGE/gpu_training_complete.marker << EOF
-# Belka GPU Training Completion Marker
-job_id: $SLURM_JOB_ID
-completion_time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-node: $SLURMD_NODENAME
-training_mode: $TRAINING_MODE
-model_path: $LATEST_MODEL
-model_size_bytes: $(stat -c%s "$LATEST_MODEL")
-submission_generated: $([ -f "data/raw/submission.csv" ] && echo "true" || echo "false")
-results_saved: $SHARED_STORAGE/results/
-EOF
         
     else
         echo "✗ No trained model found"
@@ -261,15 +206,14 @@ else
     exit 1
 fi
 
-# Copy logs to shared storage
-cp logs/gpu_training_${SLURM_JOB_ID}.log $SHARED_STORAGE/logs/
+# Logs are kept locally in logs/ directory
 
 # Final summary
 echo "=============================================="
 echo "GPU TRAINING COMPLETED SUCCESSFULLY"
 echo "Training mode: $TRAINING_MODE"
 echo "Final model: $LATEST_MODEL"
-echo "Results saved to: $SHARED_STORAGE/results/"
+echo "Results saved locally in repository"
 echo "End time: $(date)"
 echo "Total job duration: $(squeue -j $SLURM_JOB_ID -h -o %M 2>/dev/null || echo 'N/A')"
 echo "=============================================="

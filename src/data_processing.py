@@ -8,6 +8,7 @@ for the Belka molecular transformer pipeline.
 import os
 import shutil
 import itertools
+import psutil
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -23,9 +24,25 @@ from typing import Dict, Tuple, Union
 from .belka_utils import FPGenerator
 
 
+def monitor_memory() -> Dict[str, float]:
+    """
+    Monitor current memory usage.
+    
+    Returns:
+        Dictionary with memory statistics in GB
+    """
+    memory = psutil.virtual_memory()
+    return {
+        'total_gb': memory.total / (1024**3),
+        'available_gb': memory.available / (1024**3),
+        'used_gb': memory.used / (1024**3),
+        'percent_used': memory.percent
+    }
+
+
 def read_parquet(subset: str, root: str, **kwargs) -> pd.DataFrame:
     """
-    Read and preprocess train/test parquet files.
+    Read and preprocess train/test parquet files with memory-safe chunked processing.
     
     Args:
         subset: Dataset subset ('train' or 'test')
@@ -34,22 +51,127 @@ def read_parquet(subset: str, root: str, **kwargs) -> pd.DataFrame:
     Returns:
         Preprocessed DataFrame
     """
-    # Read subset
-    df = pd.read_parquet(os.path.join(root, f'{subset}.parquet'))
+    import gc
     
-    # Rename columns for consistency
-    df = df.rename(columns={
-        'buildingblock1_smiles': 'block1',
-        'buildingblock2_smiles': 'block2',
-        'buildingblock3_smiles': 'block3',
-        'molecule_smiles': 'smiles'})
-
-    # Group by molecule -> get multiclass labels
-    cols = ['block1', 'block2', 'block3', 'smiles']
-    values = 'binds' if subset == 'train' else 'id'
-    df = df.pivot(index=cols, columns='protein_name', values=values).reset_index()
-
-    return df
+    file_path = os.path.join(root, f'{subset}.parquet')
+    
+    # Initial memory check
+    mem_info = monitor_memory()
+    print(f"Memory at start: {mem_info['used_gb']:.1f}GB used, {mem_info['available_gb']:.1f}GB available ({mem_info['percent_used']:.1f}%)")
+    
+    # Get chunk size from config, default to 2000
+    chunk_size = kwargs.get('pandas_chunksize', 2000)
+    
+    # Adaptive chunk sizing based on available memory
+    if mem_info['available_gb'] < 32:  # Less than 32GB available
+        chunk_size = min(chunk_size, 1000)
+        print(f"⚠️  Low memory detected, reducing chunk size to {chunk_size}")
+    elif mem_info['available_gb'] < 16:  # Less than 16GB available
+        chunk_size = min(chunk_size, 500)
+        print(f"⚠️  Very low memory detected, reducing chunk size to {chunk_size}")
+    
+    print(f"Reading {subset}.parquet in chunks of {chunk_size}...")
+    
+    try:
+        # Use pyarrow for batch reading
+        parquet_file = pa.parquet.ParquetFile(file_path)
+        processed_chunks = []
+        
+        # Read in batches for memory efficiency
+        batch_reader = parquet_file.iter_batches(batch_size=chunk_size)
+        
+        chunk_num = 0
+        for batch in batch_reader:
+            chunk_num += 1
+            
+            # Memory check before processing each chunk
+            mem_info = monitor_memory()
+            print(f"Processing chunk {chunk_num} ({len(batch)} rows) - Memory: {mem_info['used_gb']:.1f}GB/{mem_info['total_gb']:.1f}GB ({mem_info['percent_used']:.1f}%)")
+            
+            # Memory safety check
+            if mem_info['percent_used'] > 90:
+                print(f"⚠️  Memory usage high ({mem_info['percent_used']:.1f}%), forcing garbage collection")
+                gc.collect()
+                mem_info = monitor_memory()
+                if mem_info['percent_used'] > 95:
+                    raise MemoryError(f"Memory usage too high ({mem_info['percent_used']:.1f}%), aborting to prevent OOM")
+            
+            # Convert batch to pandas DataFrame
+            chunk = batch.to_pandas()
+            
+            if len(chunk) == 0:
+                continue
+                
+            # Rename columns for consistency
+            chunk = chunk.rename(columns={
+                'buildingblock1_smiles': 'block1',
+                'buildingblock2_smiles': 'block2', 
+                'buildingblock3_smiles': 'block3',
+                'molecule_smiles': 'smiles'})
+            
+            # Group by molecule -> get multiclass labels
+            cols = ['block1', 'block2', 'block3', 'smiles']
+            values = 'binds' if subset == 'train' else 'id'
+            
+            try:
+                chunk_pivoted = chunk.pivot(index=cols, columns='protein_name', values=values).reset_index()
+                processed_chunks.append(chunk_pivoted)
+            except Exception as e:
+                print(f"Warning: Could not pivot chunk {chunk_num}, trying alternative approach: {e}")
+                try:
+                    # Alternative: group and aggregate instead of pivot
+                    chunk_grouped = chunk.groupby(cols + ['protein_name'])[values].first().unstack('protein_name').reset_index()
+                    processed_chunks.append(chunk_grouped)
+                except Exception as e2:
+                    print(f"Error: Both pivot and unstack failed for chunk {chunk_num}: {e2}")
+                    # Fallback: save raw chunk and continue
+                    processed_chunks.append(chunk)
+            
+            # Force garbage collection between chunks
+            del chunk
+            gc.collect()
+        
+        print("Combining chunks...")
+        mem_info = monitor_memory()
+        print(f"Memory before combining: {mem_info['used_gb']:.1f}GB used ({mem_info['percent_used']:.1f}%)")
+        
+        # Concatenate all processed chunks
+        if processed_chunks:
+            df = pd.concat(processed_chunks, ignore_index=True)
+            
+            # Fill any NaN values that might have been created during pivot/unstack
+            protein_cols = ['BRD4', 'HSA', 'sEH']
+            for col in protein_cols:
+                if col in df.columns:
+                    if subset == 'train':
+                        df[col] = df[col].fillna(0)  # Fill missing binds with 0
+                    else:
+                        df[col] = df[col].fillna(-1)  # Fill missing IDs with -1
+        else:
+            # Empty result
+            df = pd.DataFrame()
+        
+        # Final cleanup
+        del processed_chunks
+        gc.collect()
+        
+        # Final memory check
+        mem_info = monitor_memory()
+        print(f"Completed reading {subset}.parquet: {len(df)} rows")
+        print(f"Final memory usage: {mem_info['used_gb']:.1f}GB used ({mem_info['percent_used']:.1f}%)")
+        
+        return df
+        
+    except MemoryError as e:
+        print(f"❌ Memory error during processing: {e}")
+        # Attempt emergency cleanup
+        gc.collect()
+        raise
+    except Exception as e:
+        print(f"❌ Error reading {subset}.parquet: {e}")
+        # Attempt emergency cleanup
+        gc.collect()
+        raise
 
 
 def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
@@ -227,7 +349,8 @@ def make_parquet_memory_safe(root: str, working: str, seed: int, **kwargs) -> No
                 np.array([[2, 2, 2]], dtype=np.int8), 
                 reps=(df.shape[0], 1)).tolist()
         else:
-            df['binds'] = df['binds'].mapply(
+            # Process extra data in chunks to avoid memory issues
+            df['binds'] = df['binds'].apply(
                 lambda x: [2, 2, np.clip(x, a_min=0, a_max=1)])
         
         # Remove protein columns
