@@ -1,0 +1,225 @@
+# Belka Transformer Pipeline Configuration - GPU Cluster
+# Optimized for GPU environments with limited CPU (2 cores) but GPU access
+# Used for Steps 3-6: TensorFlow operations, training, and inference
+
+# Model Architecture Configuration
+model:
+  depth: 32                    # Hidden dimension size
+  num_heads: 8                 # Number of multi-head attention heads
+  num_layers: 4                # Number of transformer encoder layers
+  dropout_rate: 0.1            # Dropout rate for regularization
+  activation: "gelu"           # Activation function
+  max_length: 128              # Maximum sequence length for padding
+  vocab_size: 43               # Vocabulary size (N+2 for PAD and MASK tokens)
+
+# Training Configuration - GPU Optimized
+training:
+  enabled: true                # Enable training on GPU cluster
+  batch_size: 4096             # Larger batch size for GPU
+  buffer_size: 5000000         # Smaller buffer due to limited CPU
+  epochs: 1000                 # Maximum number of training epochs
+  patience: 20                 # Early stopping patience
+  steps_per_epoch: 10000       # Number of steps per training epoch
+  validation_steps: 2000       # Number of validation steps
+  masking_rate: 0.15           # MLM masking rate (15% of tokens)
+  epsilon: 1e-07               # Small constant for numerical stability
+
+# Data Configuration
+data:
+  root: "/pub/ddlin/projects/belka_del/data/raw"
+  working: "/pub/ddlin/projects/belka_del/data/raw"
+  vocab: "/pub/ddlin/projects/belka_del/data/raw/vocab.txt"
+
+# System Configuration - GPU Cluster Optimized
+system:
+  cluster_type: "gpu"
+  seed: 42
+  n_workers: 2                 # Limited CPU cores on GPU cluster
+  memory_limit_gb: 32          # Typical GPU cluster memory
+  
+# GPU Cluster Specific Settings
+gpu_cluster:
+  # GPU configuration
+  gpu:
+    mixed_precision: true      # Enable mixed precision training
+    memory_growth: true        # Allow GPU memory growth
+    memory_limit_mb: null      # No explicit limit (use all available)
+    device_placement_logging: false
+    
+  # CPU limitations handling
+  cpu_limited:
+    reduce_parallelism: true   # Reduce parallel operations
+    sequential_processing: true # Process sequentially when needed
+    small_batch_tfrecord: true # Use smaller batches for TFRecord creation
+    
+  # TensorFlow optimizations
+  tensorflow:
+    inter_op_threads: 2        # Limited by CPU cores
+    intra_op_threads: 2        # Limited by CPU cores
+    allow_soft_placement: true
+    log_device_placement: false
+    
+# Advanced Training Options - GPU Optimized
+advanced:
+  # Learning rate scheduling
+  learning_rate:
+    initial: 0.001             # Initial learning rate
+    decay_factor: 0.5          # Factor for learning rate decay
+    decay_patience: 5          # Patience for learning rate decay
+    min_lr: 1e-07              # Minimum learning rate
+  
+  # Model checkpointing
+  checkpointing:
+    save_best_only: false      # Save all models for debugging
+    save_weights_only: false   # Save full model
+    monitor: "loss"            # Metric to monitor for best model
+    mode: "min"                # Direction of improvement
+    save_freq: "epoch"         # Save frequency
+  
+  # Memory optimization for GPU
+  memory:
+    mixed_precision: true      # Use mixed precision training
+    gradient_accumulation: 1   # No gradient accumulation (sufficient GPU memory)
+    cache_dataset: false       # Don't cache due to CPU limitations
+    prefetch_buffer: 2         # Small prefetch buffer
+    
+# Pipeline Steps Configuration - GPU Cluster
+pipeline:
+  enabled_steps:
+    - "make_dataset"           # Step 3: Create TFRecord dataset
+    - "create_val_dataset"     # Step 4: Create validation dataset
+    - "train_model"            # Step 5: Train transformer model
+    - "make_submission"        # Step 6: Generate submission
+  
+  disabled_steps:
+    - "generate_parquet"       # Step 1: Done on CPU cluster
+    - "get_vocab"              # Step 2: Done on CPU cluster
+    
+  # Step-specific settings
+  step_settings:
+    make_dataset:
+      batch_size: 512          # Smaller batches due to CPU limitation
+      fingerprint_batch_size: 256
+      parallel_calls: 2        # Limited by CPU cores
+      
+    create_val_dataset:
+      streaming: true          # Use streaming for memory efficiency
+      
+    train_model:
+      gpu_memory_limit: null   # Use all available GPU memory
+      checkpoint_freq: 5       # Save checkpoints every 5 epochs
+      early_stopping_monitor: "val_loss"
+      
+    make_submission:
+      inference_batch_size: 2048  # Large batch for GPU inference
+      num_samples: null        # Process all test samples
+      
+# GPU-Specific Modes Configuration
+modes:
+  # Masked Language Model (MLM) pretraining
+  mlm:
+    description: "Masked language model pretraining on SMILES"
+    loss_function: "CategoricalLoss"
+    metrics: ["MaskedAUC"]
+    use_validation: false
+    gpu_optimized: true
+    
+  # Fingerprint Prediction (FPS)
+  fps:
+    description: "Molecular fingerprint prediction"
+    loss_function: "BinaryLoss"
+    metrics: ["MaskedAUC"]
+    output_dim: 2048
+    use_validation: true
+    gpu_optimized: true
+    
+  # Classification (CLF) for binding affinity
+  clf:
+    description: "Binding affinity classification"
+    loss_function: "MultiLabelLoss"
+    metrics: ["MaskedAUC"]
+    output_dim: 3
+    use_validation: true
+    nan_mask: 2
+    gpu_optimized: true
+
+# Data Processing Configuration - CPU Limited
+data_processing:
+  # Reduced parallelism due to CPU limitations
+  memory_safe: true            # Always use memory-safe processing
+  chunk_size: 10000            # Smaller chunks due to CPU limitation
+  sequential_chunks: true      # Process chunks sequentially
+  
+  # TensorFlow dataset optimization
+  tf_dataset:
+    cache: false               # Don't cache due to CPU limitations
+    shuffle_buffer: 1000000    # Smaller shuffle buffer
+    prefetch: 2                # Small prefetch buffer
+    num_parallel_calls: 2      # Limited by CPU cores
+    
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/gpu_cluster.log"
+  console: true
+  
+# Resource Monitoring - GPU Focus
+monitoring:
+  enabled: true
+  log_interval: 300           # Log every 5 minutes
+  track_memory: true
+  track_cpu: true
+  track_gpu: true             # Monitor GPU usage
+  track_gpu_memory: true      # Monitor GPU memory
+  
+# Environment Specific Paths
+paths:
+  temp_dir: "/tmp/belka_gpu"
+  model_dir: "/pub/ddlin/projects/belka_del/models"
+  checkpoint_dir: "/pub/ddlin/projects/belka_del/checkpoints"
+  results_dir: "/pub/ddlin/projects/belka_del/results"
+  shared_storage: "/shared/projects/belka_del"  # Shared between clusters
+  staging_dir: "/shared/projects/belka_del/staging"  # Input from CPU cluster
+  
+# Data Input Configuration (CPU → GPU handoff)
+input:
+  enabled: true
+  source: "staging"           # Read from staging directory
+  validation:
+    checksum: true            # Verify file integrity using checksums
+    size_check: true          # Verify file sizes
+    completion_marker: true   # Check for completion marker
+  required_files:
+    - "belka.parquet"
+    - "vocab.txt"
+  wait_for_completion: false  # Don't wait, fail if files not ready
+  
+# Compatibility Settings
+compatibility:
+  tensorflow_enabled: true    # Full TensorFlow operations
+  gpu_required: true
+  min_memory_gb: 16
+  min_gpu_memory_gb: 8
+  cuda_version: ">=11.0"
+  
+# Error Handling - GPU Specific
+error_handling:
+  gpu_fallback: false         # No CPU fallback (defeats purpose)
+  memory_growth_retry: true   # Retry with memory growth
+  mixed_precision_fallback: true  # Fallback to FP32 if needed
+  checkpoint_recovery: true   # Enable checkpoint recovery
+  
+# Performance Optimization
+performance:
+  # GPU-specific optimizations
+  gpu_optimizations:
+    xla_compilation: true     # Enable XLA compilation
+    tensorrt_optimization: false  # Disable TensorRT (compatibility)
+    amp_loss_scaling: "dynamic"   # Dynamic loss scaling for mixed precision
+    
+  # CPU limitation mitigations
+  cpu_mitigations:
+    reduce_data_loading_threads: true
+    sequential_data_processing: true
+    minimal_multiprocessing: true

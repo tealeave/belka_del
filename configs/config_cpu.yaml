@@ -1,0 +1,139 @@
+# Belka Transformer Pipeline Configuration - CPU Cluster
+# Optimized for high-CPU environments with many cores but no GPU access
+# Used for Steps 1-2: Data preprocessing and vocabulary extraction
+
+# Model Architecture (not used on CPU cluster, kept for compatibility)
+model:
+  depth: 32
+  num_heads: 8
+  num_layers: 4
+  dropout_rate: 0.1
+  activation: "gelu"
+  max_length: 128
+  vocab_size: 43
+
+# Training Configuration (disabled on CPU cluster)
+training:
+  enabled: false             # Disable training on CPU cluster
+  batch_size: 2048           # Kept for compatibility
+  buffer_size: 10000000
+  epochs: 1000
+  patience: 20
+  steps_per_epoch: 10000
+  validation_steps: 2000
+  masking_rate: 0.15
+  epsilon: 1e-07
+
+# Data Configuration - Optimized for CPU cluster
+data:
+  root: "/pub/ddlin/projects/belka_del/data/raw"
+  working: "/pub/ddlin/projects/belka_del/data/raw"
+  vocab: "/pub/ddlin/projects/belka_del/data/raw/vocab.txt"
+
+# System Configuration - CPU Cluster Optimized
+system:
+  cluster_type: "cpu"
+  seed: 42
+  n_workers: 16              # Maximize parallel processing on CPU cluster
+  memory_limit_gb: 64        # Typical CPU cluster memory
+  
+# CPU Cluster Specific Settings
+cpu_cluster:
+  # Data processing optimizations
+  data_processing:
+    memory_safe: true         # Always use memory-safe processing
+    chunk_size: 50000         # Large chunks for efficiency
+    parallel_tokenization: true
+    temp_dir_cleanup: true
+    
+  # Parallel processing settings
+  parallel:
+    mapply_workers: 16        # Maximize mapply parallelization
+    dask_workers: 8           # Dask worker processes
+    pandas_chunksize: 10000   # Pandas processing chunks
+    
+  # Memory management
+  memory:
+    gc_frequency: 1000        # Garbage collection frequency
+    temp_cleanup: true        # Clean temporary files
+    monitor_usage: true       # Monitor memory usage
+    
+# Advanced CPU Settings
+advanced:
+  # I/O optimization
+  io:
+    buffer_size: 1048576      # 1MB I/O buffer
+    parallel_io: true         # Enable parallel I/O
+    compression_level: 6      # Balanced compression
+    
+  # Error handling
+  error_handling:
+    max_retries: 3
+    retry_delay: 30
+    memory_fallback: true     # Fallback to smaller chunks on OOM
+    
+# Pipeline Steps Configuration - CPU Cluster
+pipeline:
+  enabled_steps:
+    - "generate_parquet"      # Step 1: Generate unified parquet
+    - "get_vocab"             # Step 2: Extract vocabulary
+  
+  disabled_steps:
+    - "make_dataset"          # Step 3: Moved to GPU cluster
+    - "create_val_dataset"    # Step 4: Moved to GPU cluster  
+    - "train_model"           # Step 5: Requires GPU
+    - "make_submission"       # Step 6: Requires GPU
+    
+  # Step-specific settings
+  step_settings:
+    generate_parquet:
+      memory_safe: true
+      validation_size: 0.03
+      shuffle_seed: 42
+      n_partitions: 20
+      
+    get_vocab:
+      tokenizer: "atomInSmiles"
+      min_frequency: 1
+      max_vocab_size: null     # No limit
+      
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/cpu_cluster.log"
+  console: true
+  
+# Resource Monitoring
+monitoring:
+  enabled: true
+  log_interval: 300           # Log every 5 minutes
+  track_memory: true
+  track_cpu: true
+  track_io: true
+  
+# Environment Specific Paths
+paths:
+  temp_dir: "/tmp/belka_cpu"
+  output_dir: "/pub/ddlin/projects/belka_del/data/processed"
+  shared_storage: "/shared/projects/belka_del"  # Shared between clusters
+  staging_dir: "/shared/projects/belka_del/staging"  # Handoff area
+  
+# Data Handoff Configuration (CPU → GPU)
+handoff:
+  enabled: true
+  staging_files:
+    - "belka.parquet"
+    - "vocab.txt"
+  validation:
+    checksum: true            # Create checksums for integrity
+    size_check: true          # Log file sizes
+    completion_marker: true   # Create completion marker file
+  cleanup_local_copies: false  # Keep local backup copies
+  
+# Compatibility Settings
+compatibility:
+  tensorflow_enabled: false   # No TensorFlow operations on CPU cluster
+  gpu_required: false
+  min_memory_gb: 16
+  min_cpu_cores: 8
