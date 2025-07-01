@@ -16,7 +16,7 @@ import atomInSmiles
 from .belka_utils import (
     Belka, MultiLabelLoss, CategoricalLoss, BinaryLoss, MaskedAUC, load_model
 )
-from .data_processing import train_val_datasets, read_parquet, get_smiles_encoder
+from .data_processing import train_val_datasets, get_smiles_encoder
 
 
 def create_model(
@@ -361,7 +361,14 @@ def make_submission(
     
     # Load and preprocess test data
     print("Loading test data...")
-    df = read_parquet(subset='test', root=root, **kwargs)
+    # The new process writes a single file to the working directory
+    test_data_path = os.path.join(working, 'belka.parquet')
+    if not os.path.exists(test_data_path):
+        raise FileNotFoundError(f"Processed test data not found at {test_data_path}")
+    
+    df_full = pd.read_parquet(test_data_path)
+    df = df_full[df_full['subset'] == 2].copy()  # subset 2 is the test set
+    del df_full # free up memory
     
     # Limit to first 1000 samples for testing (remove this for full submission)
     df = df.iloc[:1000].copy()

@@ -22,10 +22,7 @@ from belka_utils import (
     FPGenerator, Encodings, Embeddings, FeedForward, SelfAttention, EncoderLayer,
     Belka, load_model
 )
-from data_processing import (
-    read_parquet, make_parquet, make_parquet_memory_safe, get_vocab, 
-    get_smiles_encoder, make_dataset, train_val_datasets, initialize_mapply
-)
+from .data_processing import make_parquet, get_vocab, get_smiles_encoder, make_dataset, train_val_datasets
 from training import train_model, make_submission
 
 

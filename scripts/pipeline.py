@@ -21,8 +21,6 @@ import psutil
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 try:
-    # --- FIX 1: Updated the import list ---
-    # We now only need make_parquet and the downstream functions.
     from src.data_processing import (
         make_parquet,
         get_vocab,
@@ -205,11 +203,15 @@ def step_generate_parquet(config: Dict[str, Any]) -> None:
     
     # --- FIX 2: Call the new, unified make_parquet function ---
     logging.info("Using robust, memory-safe parquet generation...")
+    # Make a copy to avoid modifying the original config
+    system_params = system_config.copy()
+    # Pop seed to avoid passing it twice
+    seed = system_params.pop('seed', 42)
     make_parquet(
         root=data_config.get('root'),
         working=data_config.get('working'),
-        seed=system_config.get('seed', 42),
-        **system_config  # Pass other system configs like n_workers
+        seed=seed,
+        **system_params  # Pass other system configs like n_workers
     )
     
     logging.info("Parquet generation completed successfully")
