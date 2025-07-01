@@ -22,7 +22,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 
 try:
     from src.data_processing import (
-        make_parquet, make_parquet_memory_safe, get_vocab, make_dataset,
+        make_parquet, make_parquet_memory_safe, make_parquet_hybrid,
+        get_vocab, make_dataset,
         create_validation_dataset, initialize_mapply
     )
     from src.training import train_model, evaluate_model, make_submission, save_training_config
@@ -249,22 +250,14 @@ def step_generate_parquet(config: Dict[str, Any], memory_safe: bool = True) -> N
     n_workers = system_config.get('n_workers', -1)
     initialize_mapply(n_workers=n_workers)
     
-    # Choose parquet generation method
-    if memory_safe:
-        logging.info("Using memory-safe parquet generation")
-        make_parquet_memory_safe(
-            root=data_config.get('root'),
-            working=data_config.get('working'),
-            seed=system_config.get('seed', 42))
-    else:
-        logging.info("Using standard parquet generation")
-        make_parquet(
-            root=data_config.get('root'),
-            working=data_config.get('working'),
-            seed=system_config.get('seed', 42))
+    # Use hybrid approach for optimal performance
+    logging.info("Using hybrid parquet generation (memory-safe for large files)")
+    make_parquet_hybrid(
+        root=data_config.get('root'),
+        working=data_config.get('working'),
+        seed=system_config.get('seed', 42))
     
     logging.info("Parquet generation completed successfully")
-
 
 def step_get_vocab(config: Dict[str, Any]) -> None:
     """

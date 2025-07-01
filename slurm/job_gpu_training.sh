@@ -5,7 +5,6 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --gres=gpu:1
 #SBATCH --mem=32GB
-#SBATCH --time=24:00:00
 #SBATCH --output=logs/gpu_training_%j.out
 #SBATCH --error=logs/gpu_training_%j.err
 

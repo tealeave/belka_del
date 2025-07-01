@@ -5,7 +5,6 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --gres=gpu:1
 #SBATCH --mem=16GB
-#SBATCH --time=2:00:00
 #SBATCH --output=logs/gpu_inference_%j.out
 #SBATCH --error=logs/gpu_inference_%j.err
 

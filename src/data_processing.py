@@ -62,13 +62,16 @@ def read_parquet(subset: str, root: str, **kwargs) -> pd.DataFrame:
     # Get chunk size from config, default to 2000
     chunk_size = kwargs.get('pandas_chunksize', 2000)
     
-    # Adaptive chunk sizing based on available memory
-    if mem_info['available_gb'] < 32:  # Less than 32GB available
-        chunk_size = min(chunk_size, 1000)
+    # Adaptive chunk sizing based on available memory (optimized for 128GB RAM)
+    if mem_info['available_gb'] > 100:  # Plenty of memory available
+        chunk_size = min(chunk_size * 4, 32000)  # 4x larger chunks
+        print(f"✓ High memory available, increasing chunk size to {chunk_size}")
+    elif mem_info['available_gb'] > 64:  # Good memory available
+        chunk_size = min(chunk_size * 2, 16000)  # 2x larger chunks
+        print(f"✓ Good memory available, increasing chunk size to {chunk_size}")
+    elif mem_info['available_gb'] < 32:  # Less than 32GB available
+        chunk_size = min(chunk_size, 2000)
         print(f"⚠️  Low memory detected, reducing chunk size to {chunk_size}")
-    elif mem_info['available_gb'] < 16:  # Less than 16GB available
-        chunk_size = min(chunk_size, 500)
-        print(f"⚠️  Very low memory detected, reducing chunk size to {chunk_size}")
     
     print(f"Reading {subset}.parquet in chunks of {chunk_size}...")
     
@@ -77,30 +80,32 @@ def read_parquet(subset: str, root: str, **kwargs) -> pd.DataFrame:
         parquet_file = pa.parquet.ParquetFile(file_path)
         processed_chunks = []
         
-        # Read in batches for memory efficiency
+        # Read in batches for memory efficiency with parallel processing
         batch_reader = parquet_file.iter_batches(batch_size=chunk_size)
         
-        chunk_num = 0
-        for batch in batch_reader:
-            chunk_num += 1
-            
+        # Use concurrent processing for better CPU utilization
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        import threading
+        
+        def process_batch(batch_data):
+            batch, chunk_num = batch_data
             # Memory check before processing each chunk
             mem_info = monitor_memory()
             print(f"Processing chunk {chunk_num} ({len(batch)} rows) - Memory: {mem_info['used_gb']:.1f}GB/{mem_info['total_gb']:.1f}GB ({mem_info['percent_used']:.1f}%)")
             
             # Memory safety check
-            if mem_info['percent_used'] > 90:
+            if mem_info['percent_used'] > 85:  # Slightly lower threshold for parallel processing
                 print(f"⚠️  Memory usage high ({mem_info['percent_used']:.1f}%), forcing garbage collection")
                 gc.collect()
                 mem_info = monitor_memory()
-                if mem_info['percent_used'] > 95:
+                if mem_info['percent_used'] > 90:
                     raise MemoryError(f"Memory usage too high ({mem_info['percent_used']:.1f}%), aborting to prevent OOM")
             
             # Convert batch to pandas DataFrame
             chunk = batch.to_pandas()
             
             if len(chunk) == 0:
-                continue
+                return None
                 
             # Rename columns for consistency
             chunk = chunk.rename(columns={
@@ -115,21 +120,48 @@ def read_parquet(subset: str, root: str, **kwargs) -> pd.DataFrame:
             
             try:
                 chunk_pivoted = chunk.pivot(index=cols, columns='protein_name', values=values).reset_index()
-                processed_chunks.append(chunk_pivoted)
+                return chunk_pivoted
             except Exception as e:
                 print(f"Warning: Could not pivot chunk {chunk_num}, trying alternative approach: {e}")
                 try:
                     # Alternative: group and aggregate instead of pivot
                     chunk_grouped = chunk.groupby(cols + ['protein_name'])[values].first().unstack('protein_name').reset_index()
-                    processed_chunks.append(chunk_grouped)
+                    return chunk_grouped
                 except Exception as e2:
                     print(f"Error: Both pivot and unstack failed for chunk {chunk_num}: {e2}")
                     # Fallback: save raw chunk and continue
-                    processed_chunks.append(chunk)
+                    return chunk
+        
+        # Determine optimal number of workers (8 for memory constraint: 8×13GB = 104GB < 128GB)
+        max_workers = min(kwargs.get('n_workers', 8), 8)  # Limited to 8 for memory safety
+        print(f"Using {max_workers} parallel workers for batch processing")
+        
+        # Collect batches with indices
+        batches_with_indices = []
+        chunk_num = 0
+        for batch in batch_reader:
+            chunk_num += 1
+            batches_with_indices.append((batch, chunk_num))
+        
+        processed_chunks = []
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all batches for processing
+            future_to_chunk = {executor.submit(process_batch, batch_data): batch_data[1] 
+                              for batch_data in batches_with_indices}
             
-            # Force garbage collection between chunks
-            del chunk
-            gc.collect()
+            # Collect results as they complete
+            for future in as_completed(future_to_chunk):
+                chunk_num = future_to_chunk[future]
+                try:
+                    result = future.result()
+                    if result is not None:
+                        processed_chunks.append(result)
+                except Exception as exc:
+                    print(f'Chunk {chunk_num} generated an exception: {exc}')
+                    # Continue processing other chunks
+                    
+        # Force garbage collection after parallel processing
+        gc.collect()
         
         print("Combining chunks...")
         mem_info = monitor_memory()
@@ -170,6 +202,126 @@ def read_parquet(subset: str, root: str, **kwargs) -> pd.DataFrame:
     except Exception as e:
         print(f"❌ Error reading {subset}.parquet: {e}")
         # Attempt emergency cleanup
+        gc.collect()
+        raise
+
+
+def read_parquet_chunked_to_file(subset: str, root: str, output_file: str, **kwargs) -> None:
+    """
+    Read and preprocess train/test parquet files in chunks and write directly to file.
+    This is used by make_parquet_hybrid for memory-safe processing of large files.
+    
+    Args:
+        subset: Dataset subset ('train' or 'test')
+        root: Root directory containing the parquet files
+        output_file: Path to write the processed parquet file
+    """
+    import gc
+    
+    file_path = os.path.join(root, f'{subset}.parquet')
+    
+    # Initial memory check
+    mem_info = monitor_memory()
+    print(f"Memory at start: {mem_info['used_gb']:.1f}GB used, {mem_info['available_gb']:.1f}GB available ({mem_info['percent_used']:.1f}%)")
+    
+    # Get chunk size from config, default to 2000
+    chunk_size = kwargs.get('pandas_chunksize', 2000)
+    
+    # Adaptive chunk sizing based on available memory
+    if mem_info['available_gb'] > 100:
+        chunk_size = min(chunk_size * 4, 32000)
+        print(f"✓ High memory available, increasing chunk size to {chunk_size}")
+    elif mem_info['available_gb'] > 64:
+        chunk_size = min(chunk_size * 2, 16000)
+        print(f"✓ Good memory available, increasing chunk size to {chunk_size}")
+    elif mem_info['available_gb'] < 32:
+        chunk_size = min(chunk_size, 2000)
+        print(f"⚠️  Low memory detected, reducing chunk size to {chunk_size}")
+    
+    print(f"Reading {subset}.parquet in chunks of {chunk_size} and writing directly to file...")
+    
+    try:
+        # Use pyarrow for batch reading
+        parquet_file = pa.parquet.ParquetFile(file_path)
+        batch_reader = parquet_file.iter_batches(batch_size=chunk_size)
+        
+        # Process and write chunks sequentially to avoid memory accumulation
+        first_chunk = True
+        chunk_num = 0
+        
+        for batch in batch_reader:
+            chunk_num += 1
+            
+            # Memory check before processing each chunk
+            mem_info = monitor_memory()
+            print(f"Processing chunk {chunk_num} ({len(batch)} rows) - Memory: {mem_info['used_gb']:.1f}GB/{mem_info['total_gb']:.1f}GB ({mem_info['percent_used']:.1f}%)")
+            
+            # Memory safety check
+            if mem_info['percent_used'] > 85:
+                print(f"⚠️  Memory usage high ({mem_info['percent_used']:.1f}%), forcing garbage collection")
+                gc.collect()
+                mem_info = monitor_memory()
+                if mem_info['percent_used'] > 90:
+                    raise MemoryError(f"Memory usage too high ({mem_info['percent_used']:.1f}%), aborting to prevent OOM")
+            
+            # Convert batch to pandas DataFrame
+            chunk = batch.to_pandas()
+            
+            if len(chunk) == 0:
+                continue
+                
+            # Rename columns for consistency
+            chunk = chunk.rename(columns={
+                'buildingblock1_smiles': 'block1',
+                'buildingblock2_smiles': 'block2', 
+                'buildingblock3_smiles': 'block3',
+                'molecule_smiles': 'smiles'})
+            
+            # Group by molecule -> get multiclass labels
+            cols = ['block1', 'block2', 'block3', 'smiles']
+            values = 'binds' if subset == 'train' else 'id'
+            
+            try:
+                chunk_pivoted = chunk.pivot(index=cols, columns='protein_name', values=values).reset_index()
+            except Exception as e:
+                print(f"Warning: Could not pivot chunk {chunk_num}, trying alternative approach: {e}")
+                try:
+                    chunk_pivoted = chunk.groupby(cols + ['protein_name'])[values].first().unstack('protein_name').reset_index()
+                except Exception as e2:
+                    print(f"Error: Both pivot and unstack failed for chunk {chunk_num}: {e2}")
+                    continue
+            
+            # Fill any NaN values
+            protein_cols = ['BRD4', 'HSA', 'sEH']
+            for col in protein_cols:
+                if col in chunk_pivoted.columns:
+                    if subset == 'train':
+                        chunk_pivoted[col] = chunk_pivoted[col].fillna(0)
+                    else:
+                        chunk_pivoted[col] = chunk_pivoted[col].fillna(-1)
+            
+            # Write chunk to file
+            if first_chunk:
+                chunk_pivoted.to_parquet(output_file, engine='pyarrow', compression='snappy')
+                first_chunk = False
+            else:
+                # Append to existing file
+                existing_df = pd.read_parquet(output_file)
+                combined_df = pd.concat([existing_df, chunk_pivoted], ignore_index=True)
+                combined_df.to_parquet(output_file, engine='pyarrow', compression='snappy')
+                del existing_df, combined_df
+            
+            # Clean up
+            del chunk, chunk_pivoted
+            gc.collect()
+        
+        # Final memory check
+        mem_info = monitor_memory()
+        print(f"Completed processing {subset}.parquet")
+        print(f"Final memory usage: {mem_info['used_gb']:.1f}GB used ({mem_info['percent_used']:.1f}%)")
+        
+    except Exception as e:
+        print(f"❌ Error processing {subset}.parquet: {e}")
         gc.collect()
         raise
 
@@ -410,6 +562,197 @@ def make_parquet_memory_safe(root: str, working: str, seed: int, **kwargs) -> No
     shutil.rmtree(temp_dir)
     
     print(f"Memory-safe parquet creation completed: {output_path}")
+
+
+def make_parquet_hybrid(root: str, working: str, seed: int, **kwargs) -> None:
+    """
+    Hybrid approach: memory-safe for train.parquet, regular processing for test/extra.
+    This gives the best balance of speed and memory efficiency.
+    
+    Args:
+        root: Root directory containing raw data files
+        working: Working directory for output
+        seed: Random seed for reproducibility
+    """
+    import gc
+    
+    def validation_split(x, test_blocks: set):
+        """
+        Determine train (0) or validation (1) subset based on building block overlap.
+        """
+        blocks = set(x[col] for col in ['block1', 'block2', 'block3'])
+        overlap = len(blocks.intersection(test_blocks))
+        return np.int8(0 if overlap == 0 else 1)
+
+    def replace_linker(smiles: str) -> str:
+        """
+        Replace [Dy] DNA linker with hydrogen atom.
+        """
+        smiles = smiles.replace('[Dy]', '[H]')
+        return Chem.CanonSmiles(smiles)
+
+    # Create temporary directory
+    temp_dir = os.path.join(working, 'temp_hybrid_parquet')
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
+    os.makedirs(temp_dir)
+
+    print("=== Hybrid Parquet Processing ===")
+    print("Processing small datasets (test, extra) in memory...")
+    
+    # Process test and extra datasets normally (they're small)
+    small_datasets = []
+    
+    for subset in ['test', 'extra']:
+        print(f"\nProcessing '{subset}' subset...")
+        
+        if subset == 'test':
+            df = read_parquet(subset=subset, root=root, **kwargs)
+        else:
+            # Read extra DNA data
+            df = pd.read_csv(
+                os.path.join(root, 'DNA_Labeled_Data.csv'), 
+                usecols=['new_structure', 'read_count'])
+            df = df.rename(columns={'new_structure': 'smiles', 'read_count': 'binds'})
+
+        # Stack binding affinity labels
+        protein_cols = ['BRD4', 'HSA', 'sEH']
+        if subset == 'test':
+            # Set placeholder labels (2 = missing/unknown)
+            df["binds"] = np.tile(
+                np.array([[2, 2, 2]], dtype=np.int8), 
+                reps=(df.shape[0], 1)).tolist()
+        else:
+            # Extra data: only sEH binding, others missing
+            df['binds'] = df['binds'].mapply(
+                lambda x: [2, 2, np.clip(x, a_min=0, a_max=1)])
+        
+        # Remove individual protein columns
+        for col in protein_cols:
+            if col in df.columns:
+                df = df.drop(columns=[col])
+
+        # Set subset labels
+        df['subset'] = 2 if subset == 'test' else 0
+
+        # Remove building block columns if they exist
+        block_cols = ['block1', 'block2', 'block3']
+        for col in block_cols:
+            if col in df.columns:
+                df = df.drop(columns=[col])
+
+        # Replace [Dy] DNA linker with [H]
+        df['smiles_no_linker'] = df['smiles'].mapply(replace_linker)
+        
+        small_datasets.append(df)
+        print(f"✓ {subset} processed: {len(df)} rows")
+
+    # Save small datasets to temporary file
+    small_df = pd.concat(small_datasets, ignore_index=True)
+    small_temp_file = os.path.join(temp_dir, 'small_datasets.parquet')
+    small_df.to_parquet(small_temp_file, engine='pyarrow', compression='snappy')
+    print(f"\n✓ Small datasets saved to temporary file: {len(small_df)} rows total")
+    
+    # Clean up memory
+    del small_datasets, small_df
+    gc.collect()
+
+    # Process train.parquet with chunked approach
+    print("\n=== Processing large train.parquet dataset ===")
+    train_temp_file = os.path.join(temp_dir, 'train_processed.parquet')
+    
+    # First, read train.parquet to get building blocks for validation split
+    print("Reading building blocks for validation split...")
+    train_blocks = set()
+    
+    # Read just the building block columns
+    parquet_file = pa.parquet.ParquetFile(os.path.join(root, 'train.parquet'))
+    for batch in parquet_file.iter_batches(batch_size=10000, columns=['buildingblock1_smiles', 'buildingblock2_smiles', 'buildingblock3_smiles']):
+        chunk = batch.to_pandas()
+        train_blocks.update(chunk['buildingblock1_smiles'].unique())
+        train_blocks.update(chunk['buildingblock2_smiles'].unique())
+        train_blocks.update(chunk['buildingblock3_smiles'].unique())
+    
+    # Create validation split
+    _, val_blocks, _, _ = train_test_split(
+        list(train_blocks), list(train_blocks), 
+        test_size=0.03, random_state=seed)
+    val_blocks_set = set(val_blocks)
+    print(f"✓ Validation blocks selected: {len(val_blocks_set)} blocks")
+    
+    # Process train.parquet in chunks and write directly to file
+    print("\nProcessing train.parquet in chunks...")
+    read_parquet_chunked_to_file('train', root, train_temp_file, **kwargs)
+    
+    # Now read the processed train file and add validation splits and other processing
+    print("\nAdding validation splits and final processing to train data...")
+    train_df = pd.read_parquet(train_temp_file)
+    
+    # Stack binding affinity labels
+    protein_cols = ['BRD4', 'HSA', 'sEH']
+    train_df['binds'] = np.stack(
+        [train_df[col].to_numpy() for col in protein_cols], 
+        axis=-1, dtype=np.int8).tolist()
+    
+    # Remove individual protein columns
+    for col in protein_cols:
+        if col in train_df.columns:
+            train_df = train_df.drop(columns=[col])
+    
+    # Assign validation subset based on building block overlap
+    train_df['subset'] = train_df.mapply(
+        lambda x: validation_split(x, val_blocks_set), axis=1)
+    
+    # Remove building block columns
+    block_cols = ['block1', 'block2', 'block3']
+    for col in block_cols:
+        if col in train_df.columns:
+            train_df = train_df.drop(columns=[col])
+    
+    # Replace [Dy] DNA linker with [H]
+    train_df['smiles_no_linker'] = train_df['smiles'].mapply(replace_linker)
+    
+    # Save processed train data
+    train_df.to_parquet(train_temp_file, engine='pyarrow', compression='snappy')
+    print(f"✓ Train data processed: {len(train_df)} rows")
+    
+    # Clean up
+    del train_df
+    gc.collect()
+
+    # Combine all data using Dask
+    print("\n=== Combining all datasets with Dask ===")
+    
+    # Read all temporary files with Dask
+    small_dd = dd.read_parquet(small_temp_file)
+    train_dd = dd.read_parquet(train_temp_file)
+    
+    # Combine
+    df = dd.concat([small_dd, train_dd])
+    
+    # Shuffle and repartition
+    print("Shuffling combined data...")
+    df = df.sample(frac=1.0, random_state=seed)
+    df = df.repartition(npartitions=20)
+
+    # Save final parquet file
+    print("Writing final parquet file...")
+    output_path = os.path.join(working, 'belka.parquet')
+    df.to_parquet(output_path, schema={
+        'smiles': pa.string(),
+        'binds': pa.list_(pa.int8(), 3),
+        'subset': pa.int8(),
+        'smiles_no_linker': pa.string()})
+        
+    # Clean up temporary files
+    print("Cleaning up temporary files...")
+    shutil.rmtree(temp_dir)
+    
+    print(f"\n✓ Hybrid parquet creation completed: {output_path}")
+    
+    # Final memory report
+    mem_info = monitor_memory()
+    print(f"Final memory usage: {mem_info['used_gb']:.1f}GB used ({mem_info['percent_used']:.1f}%)")
 
 
 def get_vocab(working: str, **kwargs) -> None:
@@ -720,12 +1063,14 @@ def train_val_datasets(
     return train_ds, val_ds
 
 
-def initialize_mapply(n_workers: int = -1, **kwargs) -> None:
+def initialize_mapply(n_workers: int = 8, **kwargs) -> None:
     """
     Initialize mapply for parallel processing.
     
     Args:
-        n_workers: Number of workers (-1 for all available cores)
+        n_workers: Number of workers (default 8 for memory constraint)
     """
-    mapply.init(n_workers=n_workers, progressbar=True)
-    print(f"Mapply initialized with {n_workers} workers")
+    # Use 8 workers for optimal memory usage (8×13GB = 104GB < 128GB)
+    effective_workers = 8 if n_workers == -1 else min(n_workers, 8)
+    mapply.init(n_workers=effective_workers, progressbar=True)
+    print(f"Mapply initialized with {effective_workers} workers (memory-optimized)")

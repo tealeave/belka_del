@@ -2,9 +2,8 @@
 #SBATCH --job-name=belka_preprocess
 #SBATCH --partition=free
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=64GB
-#SBATCH --time=6:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128GB
 #SBATCH --output=logs/cpu_preprocess_%j.out
 #SBATCH --error=logs/cpu_preprocess_%j.err
 
