@@ -94,7 +94,6 @@ echo "Starting preprocessing pipeline..."
 echo "Step: preprocess (CPU cluster optimized)"
 
 time poetry run python scripts/pipeline.py \
-    --cluster-type cpu \
     --step preprocess \
     --log-level INFO \
     --log-file logs/cpu_preprocess_${SLURM_JOB_ID}.log
