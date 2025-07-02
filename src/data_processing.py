@@ -86,15 +86,25 @@ def read_and_pivot_parquet_chunks(subset: str, root: str, output_dir: str, **kwa
     os.makedirs(output_dir, exist_ok=True)
     
     chunk_size = kwargs.get('pandas_chunksize', 32000)
-    print(f"Reading '{subset}.parquet' and writing pivoted chunks to '{output_dir}'...")
+    debug_mode = kwargs.get('debug_mode', False)
+    debug_max_chunks = kwargs.get('debug_max_chunks', 3)
+    
+    debug_suffix = f" (DEBUG: max {debug_max_chunks} chunks)" if debug_mode else ""
+    print(f"Reading '{subset}.parquet' and writing pivoted chunks to '{output_dir}'{debug_suffix}...")
 
     parquet_file = pq.ParquetFile(file_path)
+    total_chunks = parquet_file.num_row_groups
     chunk_num = 0
     total_rows = 0
 
     for batch in parquet_file.iter_batches(batch_size=chunk_size):
         if len(batch) == 0:
             continue
+            
+        # DEBUG mode early exit
+        if debug_mode and chunk_num >= debug_max_chunks:
+            print(f"DEBUG: Stopping after {debug_max_chunks} chunks (processed {total_rows} rows)")
+            break
 
         chunk = batch.to_pandas()
         
@@ -127,10 +137,18 @@ def read_and_pivot_parquet_chunks(subset: str, root: str, output_dir: str, **kwa
         
         total_rows += len(chunk_pivoted)
         chunk_num += 1
+        
+        # Progress reporting
+        if chunk_num % 100 == 0 or debug_mode:
+            progress_pct = (chunk_num / total_chunks * 100) if not debug_mode else (chunk_num / min(debug_max_chunks, total_chunks) * 100)
+            print(f"  Processed chunk {chunk_num}/{total_chunks if not debug_mode else min(debug_max_chunks, total_chunks)} ({progress_pct:.1f}%) - {total_rows:,} rows")
+            monitor_memory(f"After chunk {chunk_num}")
+        
         del chunk, chunk_pivoted
         gc.collect()
 
-    print(f"✓ Finished pivoting '{subset}.parquet': {total_rows} rows in {chunk_num} chunks.")
+    debug_suffix = " (DEBUG mode)" if debug_mode else ""
+    print(f"✓ Finished pivoting '{subset}.parquet'{debug_suffix}: {total_rows} rows in {chunk_num} chunks.")
 
 
 def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
@@ -138,6 +156,10 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
     Creates the final, unified 'belka.parquet' file using a memory-safe,
     Dask-centric, and vectorized workflow. This is the primary function for data processing.
     """
+    debug_mode = kwargs.get('debug_mode', False)
+    debug_suffix = " (DEBUG MODE)" if debug_mode else ""
+    
+    print(f"Starting make_parquet{debug_suffix}...")
     monitor_memory("Start of make_parquet")
 
     # --- 1. Setup ---
@@ -167,14 +189,21 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
     def _transform_partition(df: pd.DataFrame, subset_name: str, val_blocks_set: Optional[Set] = None) -> pd.DataFrame:
         """Applies all vectorized transformations to a Dask partition (a pandas DataFrame)."""
         
-        # Drop raw protein columns if they exist
+        # Extract protein column values BEFORE dropping them
         protein_cols = ['BRD4', 'HSA', 'sEH']
+        protein_values = {}
+        if subset_name in ['train', 'test']:
+            for col in protein_cols:
+                if col in df.columns:
+                    protein_values[col] = df[col].values
+        
+        # Drop raw protein columns if they exist
         df = df.drop(columns=[col for col in protein_cols if col in df.columns], errors='ignore')
 
         # Vectorized 'binds' column creation
         if subset_name == 'train':
             binds_array = np.stack([
-                df[col].astype(np.int8).values for col in protein_cols
+                protein_values[col].astype(np.int8) for col in protein_cols
             ], axis=-1)
         elif subset_name == 'test':
             binds_array = np.full((len(df), 3), 2, dtype=np.int8)
@@ -203,16 +232,20 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
         # Drop building block columns
         df = df.drop(columns=['block1', 'block2', 'block3'], errors='ignore')
         
-        return df
+        # Ensure consistent column order for schema compliance
+        column_order = ['smiles', 'binds', 'smiles_no_linker', 'subset']
+        return df[column_order]
 
     # --- 3. Process each data source using Dask ---
     all_ddfs = []
     
     # Process 'train' and 'test' using the same chunked pattern
     for subset_name in ['train', 'test']:
+        print(f"Processing '{subset_name}' dataset...")
         chunks_dir = os.path.join(temp_dir, f'{subset_name}_chunks')
         read_and_pivot_parquet_chunks(subset_name, root, chunks_dir, **kwargs)
         
+        print(f"  Loading Dask DataFrame for '{subset_name}'...")
         ddf = dd.read_parquet(chunks_dir)
         
         # Define meta for Dask's map_partitions
@@ -221,6 +254,7 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
             'smiles_no_linker': 'object', 'subset': 'int8'
         }
         
+        print(f"  Applying transformations to '{subset_name}'...")
         transformed_ddf = ddf.map_partitions(
             _transform_partition, 
             subset_name=subset_name, 
@@ -258,7 +292,12 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
 
     print(f"Writing final parquet file to: {output_path}")
     monitor_memory("Before final to_parquet")
-    full_ddf.to_parquet(output_path, schema=schema, engine='pyarrow', compression='snappy')
+    
+    # Verify column order before writing (debugging)
+    print(f"DataFrame columns before parquet write: {list(full_ddf.columns)}")
+    
+    # Remove schema enforcement to avoid column order issues
+    full_ddf.to_parquet(output_path, engine='pyarrow', compression='snappy')
     monitor_memory("After final to_parquet")
 
     # --- 5. Cleanup ---

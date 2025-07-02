@@ -1,0 +1,20 @@
+==============================================
+Belka Transformer - CPU Cluster Preprocessing
+Job ID: 40027434
+Node: hpc3-23-15
+Start time: Wed Jul  2 15:05:08 PDT 2025
+==============================================
+Activating Poetry virtual environment...
+Using Python: /dfs6/pub/ddlin/projects/belka_del/.venv/bin/python
+Python version: Python 3.10.12
+Poetry version: Poetry (version 2.1.2)
+Current directory: /pub/ddlin/projects/belka_del
+Available CPU cores: 16
+Allocated memory: 131072MB
+Processing locally within repository
+Checking for required input files...
+All required input files found.
+Cleaning previous processed data...
+Starting preprocessing pipeline...
+🧪 DEBUG MODE ENABLED: Processing only 3 chunks for quick testing
+Step: preprocess (DEBUG mode - fast testing)

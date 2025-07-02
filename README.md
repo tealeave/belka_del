@@ -31,7 +31,10 @@ belka_del/
 This project uses Poetry for dependency management. All commands should be run with `poetry run`:
 
 ```bash
-# Run the complete pipeline
+# Quick testing with DEBUG mode (processes only 3 chunks, ~30 seconds)
+poetry run python scripts/pipeline.py --step preprocess --debug
+
+# Run the complete pipeline (production)
 poetry run python scripts/pipeline.py --step preprocess
 poetry run python scripts/pipeline.py --step train --mode clf
 
@@ -143,6 +146,10 @@ data:
 ### 1. Preprocess Data
 Combines train, test, and extra DNA data into a unified format and creates the vocabulary:
 ```bash
+# Quick debug run (3 chunks, ~30 seconds)
+poetry run python scripts/pipeline.py --step preprocess --debug
+
+# Full production run (~35+ minutes)
 poetry run python scripts/pipeline.py --step preprocess
 ```
 
@@ -156,6 +163,54 @@ poetry run python scripts/pipeline.py --step train --mode clf
 Creates a competition submission:
 ```bash
 poetry run python scripts/pipeline.py --step make_submission --model-path models/best_model.keras
+```
+
+## 🧪 Development & Debugging
+
+### DEBUG Mode
+For rapid development and testing, use DEBUG mode which processes only the first 3 chunks of data.
+
+**Run from project root directory:**
+
+```bash
+# Quick validation (30 seconds instead of 35+ minutes)
+poetry run python scripts/pipeline.py --step preprocess --debug
+
+# SLURM debug job with minimal resources
+sbatch slurm/job_cpu_preprocess_debug.sh
+```
+
+### Performance Comparison
+| Mode | Data Processed | Time | Memory | Use Case |
+|------|----------------|------|---------|----------|
+| **DEBUG** | ~96K rows (3 chunks) | ~30 seconds | ~4GB | Development, testing fixes |
+| **Production** | ~98M rows (all data) | ~35+ minutes | ~128GB | Full preprocessing |
+
+### Development Workflow
+1. **Test**: Run with `--debug` to quickly validate code changes
+2. **Validate**: Check output files and logs for correctness  
+3. **Deploy**: Run full pipeline for production data
+
+### When to Use DEBUG Mode
+- ✅ Testing code changes and bug fixes
+- ✅ Validating new features  
+- ✅ Quick pipeline verification
+- ✅ Learning the codebase
+- ❌ Final production runs
+- ❌ Full dataset analysis
+
+### SLURM Integration
+**Important**: Run these commands from the project root directory (`/pub/ddlin/projects/belka_del`)
+
+```bash
+# Quick debug testing (minimal resources)
+sbatch slurm/job_cpu_preprocess_debug.sh
+
+# Full production run (full resources)  
+sbatch slurm/job_cpu_preprocess.sh
+
+# Alternative: Environment variable debug mode
+DEBUG_MODE=true sbatch slurm/job_cpu_preprocess.sh
 ```
 
 ## 🎯 Training Modes
@@ -196,6 +251,87 @@ poetry run python scripts/pipeline.py --step train --batch-size 1024 --epochs 50
 ### Logging and Monitoring
 ```bash
 poetry run python scripts/pipeline.py --step train --log-level DEBUG --log-file training.log
+```
+
+### SLURM Cluster Usage
+For cluster environments, use the provided SLURM scripts. **Run from project root directory:**
+
+```bash
+# Quick debug testing (3 chunks, minimal resources)
+sbatch slurm/job_cpu_preprocess_debug.sh
+
+# Full production preprocessing (all data, full resources)
+sbatch slurm/job_cpu_preprocess.sh
+
+# Alternative: Use environment variable for debug mode
+DEBUG_MODE=true sbatch slurm/job_cpu_preprocess.sh
+
+# GPU training (after preprocessing)
+sbatch slurm/job_gpu_training.sh
+```
+
+**SLURM Resource Allocation:**
+- **Debug mode**: 2 CPUs, 4GB RAM, 10-minute limit
+- **Production mode**: 16 CPUs, 128GB RAM, no time limit
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+#### SLURM Script Path Errors
+```bash
+# ❌ ERROR: Unable to open file job_cpu_preprocess.sh
+sbatch job_cpu_preprocess.sh
+
+# ✅ CORRECT: Include the slurm/ directory path
+sbatch slurm/job_cpu_preprocess.sh
+
+# ✅ ALTERNATIVE: Change to slurm directory first
+cd slurm && sbatch job_cpu_preprocess.sh && cd ..
+```
+
+#### Working Directory Context
+All commands in this README assume you're in the project root directory:
+```bash
+# Verify you're in the correct directory
+pwd
+# Should show: /pub/ddlin/projects/belka_del (or your installation path)
+
+# If not, navigate to project root
+cd /path/to/your/belka_del
+```
+
+#### Poetry Environment Issues
+```bash
+# ❌ If you get "command not found" errors
+python scripts/pipeline.py --step preprocess
+
+# ✅ Always use poetry run for consistent environment
+poetry run python scripts/pipeline.py --step preprocess
+
+# Verify Poetry environment is active
+poetry env info
+```
+
+#### DEBUG Mode Not Working
+```bash
+# ❌ Wrong: Debug flag without slurm/ path
+DEBUG_MODE=true sbatch job_cpu_preprocess.sh
+
+# ✅ Correct: Include full path
+DEBUG_MODE=true sbatch slurm/job_cpu_preprocess.sh
+
+# ✅ Alternative: Use dedicated debug script
+sbatch slurm/job_cpu_preprocess_debug.sh
+```
+
+#### File Not Found Errors
+Ensure required data files exist:
+```bash
+# Check for required input files
+ls -la data/raw/train.parquet
+ls -la data/raw/test.parquet  
+ls -la data/raw/DNA_Labeled_Data.csv
 ```
 
 ## 🔄 Migration from Legacy Code

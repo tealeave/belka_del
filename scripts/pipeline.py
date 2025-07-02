@@ -344,6 +344,7 @@ def main():
                         help="'preprocess' runs data processing on CPU. 'train' runs TF dataset creation and training on GPU.")
     
     parser.add_argument('--mode', type=str, default='clf', choices=['mlm', 'fps', 'clf'], help='Training mode (for train step)')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode (process only 3 chunks for fast testing)')
     
     args = parser.parse_args()
     
@@ -357,6 +358,14 @@ def main():
         
         config_path = args.config or get_cluster_config_path(cluster_type)
         config = load_config(config_path)
+        
+        # Override debug mode from command line
+        if args.debug:
+            if 'system' not in config:
+                config['system'] = {}
+            config['system']['debug_mode'] = True
+            config['system']['debug_max_chunks'] = 3
+            logging.info("DEBUG MODE ENABLED: Will process only 3 chunks for fast testing")
         
         validate_paths(config)
         

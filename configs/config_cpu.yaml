@@ -36,6 +36,8 @@ system:
   seed: 42
   n_workers: 8               # Optimal for memory constraint (8×13GB = 104GB)
   memory_limit_gb: 128       # Increased for large datasets
+  debug_mode: false          # Enable debug mode for fast testing
+  debug_max_chunks: 3        # Maximum chunks to process in debug mode
   
 # CPU Cluster Specific Settings
 cpu_cluster:
