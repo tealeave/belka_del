@@ -12,11 +12,16 @@ import tensorflow as tf
 from tensorflow import keras
 from typing import Union, Dict, Any
 import atomInSmiles
+import logging
+import psutil
+import time
 
 from .belka_utils import (
     Belka, MultiLabelLoss, CategoricalLoss, BinaryLoss, MaskedAUC, load_model
 )
 from .data_processing import train_val_datasets, get_smiles_encoder
+
+logger = logging.getLogger(__name__)
 
 
 def create_model(
@@ -101,6 +106,61 @@ def create_model(
     return model
 
 
+class HPCProgressCallback(keras.callbacks.Callback):
+    """HPC-friendly progress tracking callback with detailed logging."""
+    
+    def __init__(self, log_every_n_batches=100, **kwargs):
+        super().__init__(**kwargs)
+        self.log_every_n_batches = log_every_n_batches
+        self.start_time = None
+        self.epoch_start_time = None
+        
+    def on_train_begin(self, logs=None):
+        self.start_time = time.time()
+        logger.info("=== Training Started ===")
+        self._log_system_resources("Training Start")
+        
+    def on_epoch_begin(self, epoch, logs=None):
+        self.epoch_start_time = time.time()
+        logger.info(f"Epoch {epoch + 1} started")
+        self._log_system_resources(f"Epoch {epoch + 1} Start")
+        
+    def on_epoch_end(self, epoch, logs=None):
+        epoch_duration = time.time() - self.epoch_start_time
+        total_duration = time.time() - self.start_time
+        
+        logger.info(f"Epoch {epoch + 1} completed in {epoch_duration:.2f}s (Total: {total_duration:.2f}s)")
+        
+        if logs:
+            for metric, value in logs.items():
+                logger.info(f"  {metric}: {value:.6f}")
+                
+        self._log_system_resources(f"Epoch {epoch + 1} End")
+        
+    def on_batch_end(self, batch, logs=None):
+        if batch % self.log_every_n_batches == 0:
+            logger.info(f"Batch {batch}: {logs}")
+            
+    def _log_system_resources(self, context):
+        """Log system resource usage."""
+        memory = psutil.virtual_memory()
+        cpu_percent = psutil.cpu_percent()
+        
+        logger.info(f"System Resources [{context}]:")
+        logger.info(f"  Memory: {memory.used / (1024**3):.2f}GB/{memory.total / (1024**3):.2f}GB ({memory.percent:.1f}%)")
+        logger.info(f"  CPU: {cpu_percent:.1f}%")
+        
+        # Log GPU memory if available
+        try:
+            gpus = tf.config.experimental.list_physical_devices('GPU')
+            if gpus:
+                gpu_details = tf.config.experimental.get_memory_info('GPU:0')
+                current_gb = gpu_details['current'] / (1024**3)
+                peak_gb = gpu_details['peak'] / (1024**3)
+                logger.info(f"  GPU Memory: {current_gb:.2f}GB current, {peak_gb:.2f}GB peak")
+        except Exception:
+            pass  # GPU monitoring not available
+
 def setup_callbacks(
     mode: str,
     model_name: str,
@@ -156,7 +216,10 @@ def setup_callbacks(
         min_lr=1e-7,
         verbose=1)
     
-    return [model_checkpoint, early_stopping, reduce_lr]
+    # Add HPC progress tracking callback
+    hpc_progress = HPCProgressCallback(log_every_n_batches=kwargs.get('log_every_n_batches', 100))
+    
+    return [model_checkpoint, early_stopping, reduce_lr, hpc_progress]
 
 
 def train_model(

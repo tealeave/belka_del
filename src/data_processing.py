@@ -27,6 +27,7 @@ from sklearn.model_selection import train_test_split
 from rdkit import Chem
 import atomInSmiles
 import gc
+import time
 from typing import Dict, Tuple, Union, Optional, Set
 
 # Local application imports
@@ -43,6 +44,35 @@ def monitor_memory(context: str = "") -> None:
         f"{memory.used / (1024**3):.1f}GB / {memory.total / (1024**3):.1f}GB "
         f"({memory.percent:.1f}%)"
     )
+
+def monitor_system_resources(context: str = "") -> None:
+    """Enhanced system resource monitoring for HPC environments."""
+    # Memory monitoring
+    memory = psutil.virtual_memory()
+    used_gb = memory.used / (1024**3)
+    total_gb = memory.total / (1024**3)
+    memory_percent = memory.percent
+    
+    # CPU monitoring
+    cpu_percent = psutil.cpu_percent(interval=1)
+    cpu_count = psutil.cpu_count()
+    
+    # Disk I/O monitoring
+    disk_io = psutil.disk_io_counters()
+    disk_usage = psutil.disk_usage('/')
+    disk_used_gb = disk_usage.used / (1024**3)
+    disk_total_gb = disk_usage.total / (1024**3)
+    disk_percent = (disk_usage.used / disk_usage.total) * 100
+    
+    logger.info(f"System Resources {context}:")
+    logger.info(f"  Memory: {used_gb:.2f}GB/{total_gb:.2f}GB ({memory_percent:.1f}%)")
+    logger.info(f"  CPU: {cpu_percent:.1f}% ({cpu_count} cores)")
+    logger.info(f"  Disk: {disk_used_gb:.2f}GB/{disk_total_gb:.2f}GB ({disk_percent:.1f}%)")
+    if disk_io:
+        logger.info(f"  Disk I/O: {disk_io.read_bytes/(1024**3):.2f}GB read, {disk_io.write_bytes/(1024**3):.2f}GB written")
+    
+    # Keep the original print for backward compatibility
+    print(f"[{context:<25}] Memory Usage: {used_gb:.1f}GB/{total_gb:.1f}GB ({memory_percent:.1f}%)")
 
 def _canonicalize_smiles_safe(smi: str) -> Optional[str]:
     """Safely canonicalize a single SMILES string, returning None on error."""
@@ -156,11 +186,13 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
     Creates the final, unified 'belka.parquet' file using a memory-safe,
     Dask-centric, and vectorized workflow. This is the primary function for data processing.
     """
+    pipeline_start_time = time.time()
     debug_mode = kwargs.get('debug_mode', False)
     debug_suffix = " (DEBUG MODE)" if debug_mode else ""
     
+    logger.info(f"Starting make_parquet pipeline with root='{root}', working='{working}', debug_mode={debug_mode}")
     print(f"Starting make_parquet{debug_suffix}...")
-    monitor_memory("Start of make_parquet")
+    monitor_system_resources("Start of make_parquet")
 
     # --- 1. Setup ---
     temp_dir = os.path.join(working, 'temp_processing')
@@ -172,10 +204,25 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
     train_blocks = set()
     try:
         bb_cols = ['buildingblock1_smiles', 'buildingblock2_smiles', 'buildingblock3_smiles']
-        for batch in pq.ParquetFile(os.path.join(root, 'train.parquet')).iter_batches(batch_size=65536, columns=bb_cols):
+        parquet_file = pq.ParquetFile(os.path.join(root, 'train.parquet'))
+        total_rows = parquet_file.metadata.num_rows
+        processed_rows = 0
+        batch_count = 0
+        
+        logger.info(f"Processing {total_rows:,} rows from train.parquet for building block extraction")
+        
+        for batch in parquet_file.iter_batches(batch_size=65536, columns=bb_cols):
+            batch_count += 1
             chunk = batch.to_pandas()
+            processed_rows += len(chunk)
+            
             for col in bb_cols:
                 train_blocks.update(chunk[col].unique())
+            
+            if batch_count % 10 == 0:
+                progress_pct = (processed_rows / total_rows) * 100
+                logger.info(f"Building block extraction: processed {processed_rows:,}/{total_rows:,} rows ({progress_pct:.1f}%) - {len(train_blocks):,} unique blocks found")
+                
     except Exception as e:
         raise RuntimeError(f"Could not read building blocks from train.parquet: {e}")
 
@@ -262,7 +309,7 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
             meta=meta
         )
         all_ddfs.append(transformed_ddf)
-        monitor_memory(f"Dask graph for '{subset_name}'")
+        monitor_system_resources(f"Dask graph for '{subset_name}'")
 
     # Process 'extra' data directly with Dask
     print("Processing 'extra' (DNA) data with Dask...")
@@ -273,7 +320,7 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
     meta_extra = {'smiles': 'object', 'binds': 'object', 'smiles_no_linker': 'object', 'subset': 'int8'}
     transformed_extra_ddf = extra_ddf.map_partitions(_transform_partition, subset_name='extra', meta=meta_extra)
     all_ddfs.append(transformed_extra_ddf)
-    monitor_memory("Dask graph for 'extra'")
+    monitor_system_resources("Dask graph for 'extra'")
 
     # --- 4. Final Assembly & Save ---
     print("Combining all datasets with Dask...")
@@ -283,28 +330,32 @@ def make_parquet(root: str, working: str, seed: int, **kwargs) -> None:
     full_ddf = full_ddf.sample(frac=1.0, random_state=seed).repartition(npartitions=20)
     
     output_path = os.path.join(working, 'belka.parquet')
-    schema = {
-        'smiles': pa.string(),
-        'binds': pa.list_(pa.int8(), 3),
-        'subset': pa.int8(),
-        'smiles_no_linker': pa.string()
-    }
+    # Define proper PyArrow schema with correct column order
+    schema = pa.schema([
+        ('smiles', pa.string()),
+        ('binds', pa.list_(pa.int8(), 3)),
+        ('smiles_no_linker', pa.string()),
+        ('subset', pa.int8())
+    ])
 
     print(f"Writing final parquet file to: {output_path}")
-    monitor_memory("Before final to_parquet")
+    monitor_system_resources("Before final to_parquet")
     
     # Verify column order before writing (debugging)
     print(f"DataFrame columns before parquet write: {list(full_ddf.columns)}")
     
-    # Remove schema enforcement to avoid column order issues
-    full_ddf.to_parquet(output_path, engine='pyarrow', compression='snappy')
-    monitor_memory("After final to_parquet")
+    # Use schema to ensure consistent data types and structure
+    full_ddf.to_parquet(output_path, engine='pyarrow', compression='snappy', schema=schema)
+    monitor_system_resources("After final to_parquet")
 
     # --- 5. Cleanup ---
     print("Cleaning up temporary files...")
     shutil.rmtree(temp_dir)
     
+    total_pipeline_time = time.time() - pipeline_start_time
+    logger.info(f"make_parquet pipeline completed in {total_pipeline_time:.2f} seconds")
     print(f"\n✓ Parquet creation completed successfully: {output_path}")
+    print(f"Total pipeline time: {total_pipeline_time:.2f} seconds")
 
 
 def get_vocab(working: str, **kwargs) -> None:
@@ -317,7 +368,11 @@ def get_vocab(working: str, **kwargs) -> None:
         raise FileNotFoundError(f"Cannot find belka.parquet at {parquet_path}. Run make_parquet first.")
         
     print("Reading parquet file with Dask to extract vocabulary...")
+    logger.info("Loading parquet file for vocabulary extraction")
     df = dd.read_parquet(parquet_path, columns=['smiles'])
+    
+    total_partitions = df.npartitions
+    logger.info(f"Vocabulary extraction: processing {total_partitions} partitions")
 
     def get_unique_tokens(partition: pd.DataFrame) -> pd.Series:
         """Tokenizes all SMILES in a partition and returns a single set of unique tokens."""
@@ -328,14 +383,18 @@ def get_vocab(working: str, **kwargs) -> None:
         return pd.Series([list(all_tokens)])
 
     # Apply to each partition
+    logger.info("Applying tokenization to all partitions...")
     unique_tokens_per_partition = df.map_partitions(get_unique_tokens, meta=(None, 'object')).compute()
     
     # Combine all unique tokens from all partitions
+    logger.info("Combining unique tokens from all partitions...")
     final_vocab = sorted(list(set(itertools.chain.from_iterable(unique_tokens_per_partition.tolist()))))
     
     vocab_path = os.path.join(working, 'vocab.txt')
+    logger.info(f"Saving vocabulary to {vocab_path}")
     pd.DataFrame(data=final_vocab).to_csv(vocab_path, index=False, header=False)
     
+    logger.info(f"Vocabulary extraction completed: {len(final_vocab)} unique tokens saved")
     print(f"Vocabulary saved to: {vocab_path} ({len(final_vocab)} tokens)")
 
 
@@ -392,6 +451,7 @@ def make_dataset(working: str, **kwargs) -> None:
         ds_partition = ds_partition.batch(1024).map(serialize_and_fingerprint, num_parallel_calls=auto).unbatch()
         
         partition_path = os.path.join(temp_dir, f'partition_{i:04d}.tfr')
+        logger.info(f"Saving TFRecord partition {i+1}/{total_partitions} to {partition_path}")
         ds_partition.save(partition_path, compression='GZIP')
         del partition, ds_partition
         gc.collect()
