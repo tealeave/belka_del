@@ -1,0 +1,570 @@
+==============================================
+Belka Transformer - CPU Cluster Preprocessing
+Job ID: 40039584
+Node: hpc3-14-07
+Start time: Wed Jul  2 21:40:48 PDT 2025
+==============================================
+Activating Poetry virtual environment...
+Using Python: /dfs6/pub/ddlin/projects/belka_del/.venv/bin/python
+Python version: Python 3.10.12
+Poetry version: Poetry (version 2.1.2)
+Current directory: /pub/ddlin/projects/belka_del
+Available CPU cores: 16
+Allocated memory: 131072MB
+Processing locally within repository
+Checking for required input files...
+All required input files found.
+Cleaning previous processed data...
+Starting preprocessing pipeline...
+🧪 DEBUG MODE ENABLED: Processing only 3 chunks for quick testing
+Step: preprocess (DEBUG mode - fast testing)
+2025-07-02 21:42:08,495 - root - INFO - Logging to file: logs/cpu_preprocess_40039584.log
+2025-07-02 21:42:08,498 - root - INFO - No GPU detected. CPU cores: 40, Memory: 188.1GB
+2025-07-02 21:42:08,498 - root - INFO - Auto-detected cluster type: cpu
+2025-07-02 21:42:08,518 - root - INFO - Configuration loaded from: configs/config_cpu.yaml
+2025-07-02 21:42:08,518 - root - INFO - DEBUG MODE ENABLED: Will process only 3 chunks for fast testing
+2025-07-02 21:42:08,519 - root - INFO - Working directory: /pub/ddlin/projects/belka_del/data/raw
+2025-07-02 21:42:08,519 - root - INFO - Running CPU Preprocessing Pipeline (Steps 1-2)
+2025-07-02 21:42:08,519 - root - INFO - Step: Generate Parquet Data
+2025-07-02 21:42:08,519 - root - INFO - Using robust, memory-safe parquet generation...
+2025-07-02 21:42:08,519 - src.data_processing - INFO - Starting make_parquet pipeline with root='/pub/ddlin/projects/belka_del/data/raw', working='/pub/ddlin/projects/belka_del/data/raw', debug_mode=True
+Starting make_parquet (DEBUG MODE)...
+2025-07-02 21:42:09,521 - src.data_processing - INFO - System Resources Start of make_parquet:
+2025-07-02 21:42:09,521 - src.data_processing - INFO -   Memory: 6.99GB/188.06GB (4.6%)
+2025-07-02 21:42:09,521 - src.data_processing - INFO -   CPU: 22.2% (40 cores)
+2025-07-02 21:42:09,521 - src.data_processing - INFO -   Disk: 134.42GB/213.10GB (63.1%)
+2025-07-02 21:42:09,521 - src.data_processing - INFO -   Disk I/O: 8.80GB read, 38.40GB written
+[Start of make_parquet    ] Memory Usage: 7.0GB/188.1GB (4.6%)
+Reading building blocks for validation split...
+2025-07-02 21:42:09,651 - src.data_processing - INFO - Processing 295,246,830 rows from train.parquet for building block extraction
+2025-07-02 21:42:09,958 - src.data_processing - INFO - Building block extraction: processed 655,360/295,246,830 rows (0.2%) - 873 unique blocks found
+2025-07-02 21:42:10,194 - src.data_processing - INFO - Building block extraction: processed 1,310,720/295,246,830 rows (0.4%) - 876 unique blocks found
+2025-07-02 21:42:10,384 - src.data_processing - INFO - Building block extraction: processed 1,966,080/295,246,830 rows (0.7%) - 876 unique blocks found
+2025-07-02 21:42:10,613 - src.data_processing - INFO - Building block extraction: processed 2,621,440/295,246,830 rows (0.9%) - 877 unique blocks found
+2025-07-02 21:42:10,843 - src.data_processing - INFO - Building block extraction: processed 3,276,800/295,246,830 rows (1.1%) - 878 unique blocks found
+2025-07-02 21:42:11,037 - src.data_processing - INFO - Building block extraction: processed 3,932,160/295,246,830 rows (1.3%) - 878 unique blocks found
+2025-07-02 21:42:11,335 - src.data_processing - INFO - Building block extraction: processed 4,587,520/295,246,830 rows (1.6%) - 879 unique blocks found
+2025-07-02 21:42:11,523 - src.data_processing - INFO - Building block extraction: processed 5,242,880/295,246,830 rows (1.8%) - 879 unique blocks found
+2025-07-02 21:42:11,732 - src.data_processing - INFO - Building block extraction: processed 5,898,240/295,246,830 rows (2.0%) - 880 unique blocks found
+2025-07-02 21:42:11,941 - src.data_processing - INFO - Building block extraction: processed 6,553,600/295,246,830 rows (2.2%) - 881 unique blocks found
+2025-07-02 21:42:12,125 - src.data_processing - INFO - Building block extraction: processed 7,208,960/295,246,830 rows (2.4%) - 881 unique blocks found
+2025-07-02 21:42:12,330 - src.data_processing - INFO - Building block extraction: processed 7,864,320/295,246,830 rows (2.7%) - 882 unique blocks found
+2025-07-02 21:42:12,567 - src.data_processing - INFO - Building block extraction: processed 8,519,680/295,246,830 rows (2.9%) - 882 unique blocks found
+2025-07-02 21:42:12,754 - src.data_processing - INFO - Building block extraction: processed 9,175,040/295,246,830 rows (3.1%) - 883 unique blocks found
+2025-07-02 21:42:12,965 - src.data_processing - INFO - Building block extraction: processed 9,830,400/295,246,830 rows (3.3%) - 884 unique blocks found
+2025-07-02 21:42:13,152 - src.data_processing - INFO - Building block extraction: processed 10,485,760/295,246,830 rows (3.6%) - 884 unique blocks found
+2025-07-02 21:42:13,365 - src.data_processing - INFO - Building block extraction: processed 11,141,120/295,246,830 rows (3.8%) - 885 unique blocks found
+2025-07-02 21:42:13,598 - src.data_processing - INFO - Building block extraction: processed 11,796,480/295,246,830 rows (4.0%) - 885 unique blocks found
+2025-07-02 21:42:13,794 - src.data_processing - INFO - Building block extraction: processed 12,451,840/295,246,830 rows (4.2%) - 886 unique blocks found
+2025-07-02 21:42:14,005 - src.data_processing - INFO - Building block extraction: processed 13,107,200/295,246,830 rows (4.4%) - 887 unique blocks found
+2025-07-02 21:42:14,228 - src.data_processing - INFO - Building block extraction: processed 13,762,560/295,246,830 rows (4.7%) - 887 unique blocks found
+2025-07-02 21:42:14,420 - src.data_processing - INFO - Building block extraction: processed 14,417,920/295,246,830 rows (4.9%) - 888 unique blocks found
+2025-07-02 21:42:14,637 - src.data_processing - INFO - Building block extraction: processed 15,073,280/295,246,830 rows (5.1%) - 888 unique blocks found
+2025-07-02 21:42:14,851 - src.data_processing - INFO - Building block extraction: processed 15,728,640/295,246,830 rows (5.3%) - 889 unique blocks found
+2025-07-02 21:42:15,109 - src.data_processing - INFO - Building block extraction: processed 16,384,000/295,246,830 rows (5.5%) - 890 unique blocks found
+2025-07-02 21:42:15,313 - src.data_processing - INFO - Building block extraction: processed 17,039,360/295,246,830 rows (5.8%) - 890 unique blocks found
+2025-07-02 21:42:15,499 - src.data_processing - INFO - Building block extraction: processed 17,694,720/295,246,830 rows (6.0%) - 891 unique blocks found
+2025-07-02 21:42:15,740 - src.data_processing - INFO - Building block extraction: processed 18,350,080/295,246,830 rows (6.2%) - 891 unique blocks found
+2025-07-02 21:42:15,951 - src.data_processing - INFO - Building block extraction: processed 19,005,440/295,246,830 rows (6.4%) - 892 unique blocks found
+2025-07-02 21:42:16,140 - src.data_processing - INFO - Building block extraction: processed 19,660,800/295,246,830 rows (6.7%) - 893 unique blocks found
+2025-07-02 21:42:16,344 - src.data_processing - INFO - Building block extraction: processed 20,316,160/295,246,830 rows (6.9%) - 893 unique blocks found
+2025-07-02 21:42:16,528 - src.data_processing - INFO - Building block extraction: processed 20,971,520/295,246,830 rows (7.1%) - 894 unique blocks found
+2025-07-02 21:42:16,735 - src.data_processing - INFO - Building block extraction: processed 21,626,880/295,246,830 rows (7.3%) - 894 unique blocks found
+2025-07-02 21:42:16,955 - src.data_processing - INFO - Building block extraction: processed 22,282,240/295,246,830 rows (7.5%) - 895 unique blocks found
+2025-07-02 21:42:17,145 - src.data_processing - INFO - Building block extraction: processed 22,937,600/295,246,830 rows (7.8%) - 896 unique blocks found
+2025-07-02 21:42:17,366 - src.data_processing - INFO - Building block extraction: processed 23,592,960/295,246,830 rows (8.0%) - 896 unique blocks found
+2025-07-02 21:42:17,582 - src.data_processing - INFO - Building block extraction: processed 24,248,320/295,246,830 rows (8.2%) - 897 unique blocks found
+2025-07-02 21:42:17,769 - src.data_processing - INFO - Building block extraction: processed 24,903,680/295,246,830 rows (8.4%) - 897 unique blocks found
+2025-07-02 21:42:17,981 - src.data_processing - INFO - Building block extraction: processed 25,559,040/295,246,830 rows (8.7%) - 898 unique blocks found
+2025-07-02 21:42:18,173 - src.data_processing - INFO - Building block extraction: processed 26,214,400/295,246,830 rows (8.9%) - 899 unique blocks found
+2025-07-02 21:42:18,383 - src.data_processing - INFO - Building block extraction: processed 26,869,760/295,246,830 rows (9.1%) - 899 unique blocks found
+2025-07-02 21:42:18,576 - src.data_processing - INFO - Building block extraction: processed 27,525,120/295,246,830 rows (9.3%) - 900 unique blocks found
+2025-07-02 21:42:18,769 - src.data_processing - INFO - Building block extraction: processed 28,180,480/295,246,830 rows (9.5%) - 900 unique blocks found
+2025-07-02 21:42:18,980 - src.data_processing - INFO - Building block extraction: processed 28,835,840/295,246,830 rows (9.8%) - 901 unique blocks found
+2025-07-02 21:42:19,211 - src.data_processing - INFO - Building block extraction: processed 29,491,200/295,246,830 rows (10.0%) - 902 unique blocks found
+2025-07-02 21:42:19,403 - src.data_processing - INFO - Building block extraction: processed 30,146,560/295,246,830 rows (10.2%) - 902 unique blocks found
+2025-07-02 21:42:19,719 - src.data_processing - INFO - Building block extraction: processed 30,801,920/295,246,830 rows (10.4%) - 903 unique blocks found
+2025-07-02 21:42:19,909 - src.data_processing - INFO - Building block extraction: processed 31,457,280/295,246,830 rows (10.7%) - 903 unique blocks found
+2025-07-02 21:42:20,117 - src.data_processing - INFO - Building block extraction: processed 32,112,640/295,246,830 rows (10.9%) - 904 unique blocks found
+2025-07-02 21:42:20,596 - src.data_processing - INFO - Building block extraction: processed 32,768,000/295,246,830 rows (11.1%) - 905 unique blocks found
+2025-07-02 21:42:20,786 - src.data_processing - INFO - Building block extraction: processed 33,423,360/295,246,830 rows (11.3%) - 905 unique blocks found
+2025-07-02 21:42:21,012 - src.data_processing - INFO - Building block extraction: processed 34,078,720/295,246,830 rows (11.5%) - 906 unique blocks found
+2025-07-02 21:42:21,216 - src.data_processing - INFO - Building block extraction: processed 34,734,080/295,246,830 rows (11.8%) - 906 unique blocks found
+2025-07-02 21:42:21,408 - src.data_processing - INFO - Building block extraction: processed 35,389,440/295,246,830 rows (12.0%) - 907 unique blocks found
+2025-07-02 21:42:21,631 - src.data_processing - INFO - Building block extraction: processed 36,044,800/295,246,830 rows (12.2%) - 908 unique blocks found
+2025-07-02 21:42:21,817 - src.data_processing - INFO - Building block extraction: processed 36,700,160/295,246,830 rows (12.4%) - 908 unique blocks found
+2025-07-02 21:42:22,050 - src.data_processing - INFO - Building block extraction: processed 37,355,520/295,246,830 rows (12.7%) - 909 unique blocks found
+2025-07-02 21:42:22,264 - src.data_processing - INFO - Building block extraction: processed 38,010,880/295,246,830 rows (12.9%) - 909 unique blocks found
+2025-07-02 21:42:22,453 - src.data_processing - INFO - Building block extraction: processed 38,666,240/295,246,830 rows (13.1%) - 910 unique blocks found
+2025-07-02 21:42:22,689 - src.data_processing - INFO - Building block extraction: processed 39,321,600/295,246,830 rows (13.3%) - 911 unique blocks found
+2025-07-02 21:42:22,893 - src.data_processing - INFO - Building block extraction: processed 39,976,960/295,246,830 rows (13.5%) - 911 unique blocks found
+2025-07-02 21:42:23,080 - src.data_processing - INFO - Building block extraction: processed 40,632,320/295,246,830 rows (13.8%) - 912 unique blocks found
+2025-07-02 21:42:23,298 - src.data_processing - INFO - Building block extraction: processed 41,287,680/295,246,830 rows (14.0%) - 912 unique blocks found
+2025-07-02 21:42:23,490 - src.data_processing - INFO - Building block extraction: processed 41,943,040/295,246,830 rows (14.2%) - 913 unique blocks found
+2025-07-02 21:42:23,720 - src.data_processing - INFO - Building block extraction: processed 42,598,400/295,246,830 rows (14.4%) - 914 unique blocks found
+2025-07-02 21:42:23,941 - src.data_processing - INFO - Building block extraction: processed 43,253,760/295,246,830 rows (14.7%) - 914 unique blocks found
+2025-07-02 21:42:24,133 - src.data_processing - INFO - Building block extraction: processed 43,909,120/295,246,830 rows (14.9%) - 915 unique blocks found
+2025-07-02 21:42:24,364 - src.data_processing - INFO - Building block extraction: processed 44,564,480/295,246,830 rows (15.1%) - 915 unique blocks found
+2025-07-02 21:42:24,570 - src.data_processing - INFO - Building block extraction: processed 45,219,840/295,246,830 rows (15.3%) - 916 unique blocks found
+2025-07-02 21:42:24,758 - src.data_processing - INFO - Building block extraction: processed 45,875,200/295,246,830 rows (15.5%) - 917 unique blocks found
+2025-07-02 21:42:24,974 - src.data_processing - INFO - Building block extraction: processed 46,530,560/295,246,830 rows (15.8%) - 917 unique blocks found
+2025-07-02 21:42:25,167 - src.data_processing - INFO - Building block extraction: processed 47,185,920/295,246,830 rows (16.0%) - 918 unique blocks found
+2025-07-02 21:42:25,382 - src.data_processing - INFO - Building block extraction: processed 47,841,280/295,246,830 rows (16.2%) - 918 unique blocks found
+2025-07-02 21:42:25,588 - src.data_processing - INFO - Building block extraction: processed 48,496,640/295,246,830 rows (16.4%) - 919 unique blocks found
+2025-07-02 21:42:25,777 - src.data_processing - INFO - Building block extraction: processed 49,152,000/295,246,830 rows (16.6%) - 920 unique blocks found
+2025-07-02 21:42:26,025 - src.data_processing - INFO - Building block extraction: processed 49,807,360/295,246,830 rows (16.9%) - 920 unique blocks found
+2025-07-02 21:42:26,241 - src.data_processing - INFO - Building block extraction: processed 50,462,720/295,246,830 rows (17.1%) - 921 unique blocks found
+2025-07-02 21:42:26,427 - src.data_processing - INFO - Building block extraction: processed 51,118,080/295,246,830 rows (17.3%) - 921 unique blocks found
+2025-07-02 21:42:26,651 - src.data_processing - INFO - Building block extraction: processed 51,773,440/295,246,830 rows (17.5%) - 922 unique blocks found
+2025-07-02 21:42:26,841 - src.data_processing - INFO - Building block extraction: processed 52,428,800/295,246,830 rows (17.8%) - 923 unique blocks found
+2025-07-02 21:42:27,086 - src.data_processing - INFO - Building block extraction: processed 53,084,160/295,246,830 rows (18.0%) - 923 unique blocks found
+2025-07-02 21:42:27,305 - src.data_processing - INFO - Building block extraction: processed 53,739,520/295,246,830 rows (18.2%) - 924 unique blocks found
+2025-07-02 21:42:27,494 - src.data_processing - INFO - Building block extraction: processed 54,394,880/295,246,830 rows (18.4%) - 924 unique blocks found
+2025-07-02 21:42:27,717 - src.data_processing - INFO - Building block extraction: processed 55,050,240/295,246,830 rows (18.6%) - 925 unique blocks found
+2025-07-02 21:42:27,916 - src.data_processing - INFO - Building block extraction: processed 55,705,600/295,246,830 rows (18.9%) - 926 unique blocks found
+2025-07-02 21:42:28,106 - src.data_processing - INFO - Building block extraction: processed 56,360,960/295,246,830 rows (19.1%) - 926 unique blocks found
+2025-07-02 21:42:28,319 - src.data_processing - INFO - Building block extraction: processed 57,016,320/295,246,830 rows (19.3%) - 927 unique blocks found
+2025-07-02 21:42:28,513 - src.data_processing - INFO - Building block extraction: processed 57,671,680/295,246,830 rows (19.5%) - 927 unique blocks found
+2025-07-02 21:42:28,732 - src.data_processing - INFO - Building block extraction: processed 58,327,040/295,246,830 rows (19.8%) - 928 unique blocks found
+2025-07-02 21:42:28,949 - src.data_processing - INFO - Building block extraction: processed 58,982,400/295,246,830 rows (20.0%) - 929 unique blocks found
+2025-07-02 21:42:29,136 - src.data_processing - INFO - Building block extraction: processed 59,637,760/295,246,830 rows (20.2%) - 929 unique blocks found
+2025-07-02 21:42:29,346 - src.data_processing - INFO - Building block extraction: processed 60,293,120/295,246,830 rows (20.4%) - 930 unique blocks found
+2025-07-02 21:42:29,572 - src.data_processing - INFO - Building block extraction: processed 60,948,480/295,246,830 rows (20.6%) - 930 unique blocks found
+2025-07-02 21:42:29,765 - src.data_processing - INFO - Building block extraction: processed 61,603,840/295,246,830 rows (20.9%) - 931 unique blocks found
+2025-07-02 21:42:30,023 - src.data_processing - INFO - Building block extraction: processed 62,259,200/295,246,830 rows (21.1%) - 932 unique blocks found
+2025-07-02 21:42:30,218 - src.data_processing - INFO - Building block extraction: processed 62,914,560/295,246,830 rows (21.3%) - 932 unique blocks found
+2025-07-02 21:42:30,450 - src.data_processing - INFO - Building block extraction: processed 63,569,920/295,246,830 rows (21.5%) - 933 unique blocks found
+2025-07-02 21:42:30,663 - src.data_processing - INFO - Building block extraction: processed 64,225,280/295,246,830 rows (21.8%) - 933 unique blocks found
+2025-07-02 21:42:30,858 - src.data_processing - INFO - Building block extraction: processed 64,880,640/295,246,830 rows (22.0%) - 934 unique blocks found
+2025-07-02 21:42:31,075 - src.data_processing - INFO - Building block extraction: processed 65,536,000/295,246,830 rows (22.2%) - 935 unique blocks found
+2025-07-02 21:42:31,312 - src.data_processing - INFO - Building block extraction: processed 66,191,360/295,246,830 rows (22.4%) - 935 unique blocks found
+2025-07-02 21:42:31,504 - src.data_processing - INFO - Building block extraction: processed 66,846,720/295,246,830 rows (22.6%) - 936 unique blocks found
+2025-07-02 21:42:31,794 - src.data_processing - INFO - Building block extraction: processed 67,502,080/295,246,830 rows (22.9%) - 936 unique blocks found
+2025-07-02 21:42:31,984 - src.data_processing - INFO - Building block extraction: processed 68,157,440/295,246,830 rows (23.1%) - 937 unique blocks found
+2025-07-02 21:42:32,195 - src.data_processing - INFO - Building block extraction: processed 68,812,800/295,246,830 rows (23.3%) - 938 unique blocks found
+2025-07-02 21:42:32,393 - src.data_processing - INFO - Building block extraction: processed 69,468,160/295,246,830 rows (23.5%) - 938 unique blocks found
+2025-07-02 21:42:32,587 - src.data_processing - INFO - Building block extraction: processed 70,123,520/295,246,830 rows (23.8%) - 939 unique blocks found
+2025-07-02 21:42:32,802 - src.data_processing - INFO - Building block extraction: processed 70,778,880/295,246,830 rows (24.0%) - 939 unique blocks found
+2025-07-02 21:42:33,016 - src.data_processing - INFO - Building block extraction: processed 71,434,240/295,246,830 rows (24.2%) - 940 unique blocks found
+2025-07-02 21:42:33,209 - src.data_processing - INFO - Building block extraction: processed 72,089,600/295,246,830 rows (24.4%) - 941 unique blocks found
+2025-07-02 21:42:33,418 - src.data_processing - INFO - Building block extraction: processed 72,744,960/295,246,830 rows (24.6%) - 941 unique blocks found
+2025-07-02 21:42:33,605 - src.data_processing - INFO - Building block extraction: processed 73,400,320/295,246,830 rows (24.9%) - 942 unique blocks found
+2025-07-02 21:42:33,820 - src.data_processing - INFO - Building block extraction: processed 74,055,680/295,246,830 rows (25.1%) - 942 unique blocks found
+2025-07-02 21:42:34,047 - src.data_processing - INFO - Building block extraction: processed 74,711,040/295,246,830 rows (25.3%) - 943 unique blocks found
+2025-07-02 21:42:34,233 - src.data_processing - INFO - Building block extraction: processed 75,366,400/295,246,830 rows (25.5%) - 944 unique blocks found
+2025-07-02 21:42:34,427 - src.data_processing - INFO - Building block extraction: processed 76,021,760/295,246,830 rows (25.7%) - 944 unique blocks found
+2025-07-02 21:42:34,616 - src.data_processing - INFO - Building block extraction: processed 76,677,120/295,246,830 rows (26.0%) - 945 unique blocks found
+2025-07-02 21:42:34,796 - src.data_processing - INFO - Building block extraction: processed 77,332,480/295,246,830 rows (26.2%) - 945 unique blocks found
+2025-07-02 21:42:35,017 - src.data_processing - INFO - Building block extraction: processed 77,987,840/295,246,830 rows (26.4%) - 946 unique blocks found
+2025-07-02 21:42:35,201 - src.data_processing - INFO - Building block extraction: processed 78,643,200/295,246,830 rows (26.6%) - 947 unique blocks found
+2025-07-02 21:42:35,411 - src.data_processing - INFO - Building block extraction: processed 79,298,560/295,246,830 rows (26.9%) - 947 unique blocks found
+2025-07-02 21:42:35,625 - src.data_processing - INFO - Building block extraction: processed 79,953,920/295,246,830 rows (27.1%) - 948 unique blocks found
+2025-07-02 21:42:35,810 - src.data_processing - INFO - Building block extraction: processed 80,609,280/295,246,830 rows (27.3%) - 948 unique blocks found
+2025-07-02 21:42:36,006 - src.data_processing - INFO - Building block extraction: processed 81,264,640/295,246,830 rows (27.5%) - 949 unique blocks found
+2025-07-02 21:42:36,199 - src.data_processing - INFO - Building block extraction: processed 81,920,000/295,246,830 rows (27.7%) - 950 unique blocks found
+2025-07-02 21:42:36,387 - src.data_processing - INFO - Building block extraction: processed 82,575,360/295,246,830 rows (28.0%) - 950 unique blocks found
+2025-07-02 21:42:36,600 - src.data_processing - INFO - Building block extraction: processed 83,230,720/295,246,830 rows (28.2%) - 951 unique blocks found
+2025-07-02 21:42:36,793 - src.data_processing - INFO - Building block extraction: processed 83,886,080/295,246,830 rows (28.4%) - 952 unique blocks found
+2025-07-02 21:42:36,985 - src.data_processing - INFO - Building block extraction: processed 84,541,440/295,246,830 rows (28.6%) - 952 unique blocks found
+2025-07-02 21:42:37,235 - src.data_processing - INFO - Building block extraction: processed 85,196,800/295,246,830 rows (28.9%) - 953 unique blocks found
+2025-07-02 21:42:37,424 - src.data_processing - INFO - Building block extraction: processed 85,852,160/295,246,830 rows (29.1%) - 953 unique blocks found
+2025-07-02 21:42:37,663 - src.data_processing - INFO - Building block extraction: processed 86,507,520/295,246,830 rows (29.3%) - 954 unique blocks found
+2025-07-02 21:42:37,864 - src.data_processing - INFO - Building block extraction: processed 87,162,880/295,246,830 rows (29.5%) - 955 unique blocks found
+2025-07-02 21:42:38,057 - src.data_processing - INFO - Building block extraction: processed 87,818,240/295,246,830 rows (29.7%) - 955 unique blocks found
+2025-07-02 21:42:38,273 - src.data_processing - INFO - Building block extraction: processed 88,473,600/295,246,830 rows (30.0%) - 956 unique blocks found
+2025-07-02 21:42:38,462 - src.data_processing - INFO - Building block extraction: processed 89,128,960/295,246,830 rows (30.2%) - 956 unique blocks found
+2025-07-02 21:42:38,673 - src.data_processing - INFO - Building block extraction: processed 89,784,320/295,246,830 rows (30.4%) - 957 unique blocks found
+2025-07-02 21:42:38,887 - src.data_processing - INFO - Building block extraction: processed 90,439,680/295,246,830 rows (30.6%) - 958 unique blocks found
+2025-07-02 21:42:39,087 - src.data_processing - INFO - Building block extraction: processed 91,095,040/295,246,830 rows (30.9%) - 958 unique blocks found
+2025-07-02 21:42:39,304 - src.data_processing - INFO - Building block extraction: processed 91,750,400/295,246,830 rows (31.1%) - 959 unique blocks found
+2025-07-02 21:42:39,506 - src.data_processing - INFO - Building block extraction: processed 92,405,760/295,246,830 rows (31.3%) - 959 unique blocks found
+2025-07-02 21:42:39,699 - src.data_processing - INFO - Building block extraction: processed 93,061,120/295,246,830 rows (31.5%) - 960 unique blocks found
+2025-07-02 21:42:39,917 - src.data_processing - INFO - Building block extraction: processed 93,716,480/295,246,830 rows (31.7%) - 961 unique blocks found
+2025-07-02 21:42:40,117 - src.data_processing - INFO - Building block extraction: processed 94,371,840/295,246,830 rows (32.0%) - 961 unique blocks found
+2025-07-02 21:42:40,343 - src.data_processing - INFO - Building block extraction: processed 95,027,200/295,246,830 rows (32.2%) - 962 unique blocks found
+2025-07-02 21:42:40,581 - src.data_processing - INFO - Building block extraction: processed 95,682,560/295,246,830 rows (32.4%) - 962 unique blocks found
+2025-07-02 21:42:40,777 - src.data_processing - INFO - Building block extraction: processed 96,337,920/295,246,830 rows (32.6%) - 963 unique blocks found
+2025-07-02 21:42:40,999 - src.data_processing - INFO - Building block extraction: processed 96,993,280/295,246,830 rows (32.9%) - 964 unique blocks found
+2025-07-02 21:42:41,198 - src.data_processing - INFO - Building block extraction: processed 97,648,640/295,246,830 rows (33.1%) - 964 unique blocks found
+2025-07-02 21:42:41,390 - src.data_processing - INFO - Building block extraction: processed 98,304,000/295,246,830 rows (33.3%) - 965 unique blocks found
+2025-07-02 21:42:41,609 - src.data_processing - INFO - Building block extraction: processed 98,959,360/295,246,830 rows (33.5%) - 965 unique blocks found
+2025-07-02 21:42:41,803 - src.data_processing - INFO - Building block extraction: processed 99,614,720/295,246,830 rows (33.7%) - 966 unique blocks found
+2025-07-02 21:42:42,036 - src.data_processing - INFO - Building block extraction: processed 100,270,080/295,246,830 rows (34.0%) - 967 unique blocks found
+2025-07-02 21:42:42,250 - src.data_processing - INFO - Building block extraction: processed 100,925,440/295,246,830 rows (34.2%) - 967 unique blocks found
+2025-07-02 21:42:42,452 - src.data_processing - INFO - Building block extraction: processed 101,580,800/295,246,830 rows (34.4%) - 968 unique blocks found
+2025-07-02 21:42:42,687 - src.data_processing - INFO - Building block extraction: processed 102,236,160/295,246,830 rows (34.6%) - 968 unique blocks found
+2025-07-02 21:42:42,932 - src.data_processing - INFO - Building block extraction: processed 102,891,520/295,246,830 rows (34.8%) - 969 unique blocks found
+2025-07-02 21:42:43,123 - src.data_processing - INFO - Building block extraction: processed 103,546,880/295,246,830 rows (35.1%) - 970 unique blocks found
+2025-07-02 21:42:43,326 - src.data_processing - INFO - Building block extraction: processed 104,202,240/295,246,830 rows (35.3%) - 970 unique blocks found
+2025-07-02 21:42:43,514 - src.data_processing - INFO - Building block extraction: processed 104,857,600/295,246,830 rows (35.5%) - 971 unique blocks found
+2025-07-02 21:42:43,719 - src.data_processing - INFO - Building block extraction: processed 105,512,960/295,246,830 rows (35.7%) - 971 unique blocks found
+2025-07-02 21:42:43,948 - src.data_processing - INFO - Building block extraction: processed 106,168,320/295,246,830 rows (36.0%) - 972 unique blocks found
+2025-07-02 21:42:44,139 - src.data_processing - INFO - Building block extraction: processed 106,823,680/295,246,830 rows (36.2%) - 973 unique blocks found
+2025-07-02 21:42:44,350 - src.data_processing - INFO - Building block extraction: processed 107,479,040/295,246,830 rows (36.4%) - 973 unique blocks found
+2025-07-02 21:42:44,571 - src.data_processing - INFO - Building block extraction: processed 108,134,400/295,246,830 rows (36.6%) - 974 unique blocks found
+2025-07-02 21:42:44,766 - src.data_processing - INFO - Building block extraction: processed 108,789,760/295,246,830 rows (36.8%) - 974 unique blocks found
+2025-07-02 21:42:45,008 - src.data_processing - INFO - Building block extraction: processed 109,445,120/295,246,830 rows (37.1%) - 975 unique blocks found
+2025-07-02 21:42:45,198 - src.data_processing - INFO - Building block extraction: processed 110,100,480/295,246,830 rows (37.3%) - 976 unique blocks found
+2025-07-02 21:42:45,396 - src.data_processing - INFO - Building block extraction: processed 110,755,840/295,246,830 rows (37.5%) - 976 unique blocks found
+2025-07-02 21:42:45,609 - src.data_processing - INFO - Building block extraction: processed 111,411,200/295,246,830 rows (37.7%) - 977 unique blocks found
+2025-07-02 21:42:45,796 - src.data_processing - INFO - Building block extraction: processed 112,066,560/295,246,830 rows (38.0%) - 977 unique blocks found
+2025-07-02 21:42:46,022 - src.data_processing - INFO - Building block extraction: processed 112,721,920/295,246,830 rows (38.2%) - 978 unique blocks found
+2025-07-02 21:42:46,240 - src.data_processing - INFO - Building block extraction: processed 113,377,280/295,246,830 rows (38.4%) - 979 unique blocks found
+2025-07-02 21:42:46,430 - src.data_processing - INFO - Building block extraction: processed 114,032,640/295,246,830 rows (38.6%) - 979 unique blocks found
+2025-07-02 21:42:46,648 - src.data_processing - INFO - Building block extraction: processed 114,688,000/295,246,830 rows (38.8%) - 980 unique blocks found
+2025-07-02 21:42:46,837 - src.data_processing - INFO - Building block extraction: processed 115,343,360/295,246,830 rows (39.1%) - 980 unique blocks found
+2025-07-02 21:42:47,052 - src.data_processing - INFO - Building block extraction: processed 115,998,720/295,246,830 rows (39.3%) - 981 unique blocks found
+2025-07-02 21:42:47,271 - src.data_processing - INFO - Building block extraction: processed 116,654,080/295,246,830 rows (39.5%) - 982 unique blocks found
+2025-07-02 21:42:47,462 - src.data_processing - INFO - Building block extraction: processed 117,309,440/295,246,830 rows (39.7%) - 982 unique blocks found
+2025-07-02 21:42:47,677 - src.data_processing - INFO - Building block extraction: processed 117,964,800/295,246,830 rows (40.0%) - 983 unique blocks found
+2025-07-02 21:42:47,898 - src.data_processing - INFO - Building block extraction: processed 118,620,160/295,246,830 rows (40.2%) - 983 unique blocks found
+2025-07-02 21:42:48,095 - src.data_processing - INFO - Building block extraction: processed 119,275,520/295,246,830 rows (40.4%) - 984 unique blocks found
+2025-07-02 21:42:48,335 - src.data_processing - INFO - Building block extraction: processed 119,930,880/295,246,830 rows (40.6%) - 985 unique blocks found
+2025-07-02 21:42:48,531 - src.data_processing - INFO - Building block extraction: processed 120,586,240/295,246,830 rows (40.8%) - 985 unique blocks found
+2025-07-02 21:42:48,751 - src.data_processing - INFO - Building block extraction: processed 121,241,600/295,246,830 rows (41.1%) - 986 unique blocks found
+2025-07-02 21:42:48,968 - src.data_processing - INFO - Building block extraction: processed 121,896,960/295,246,830 rows (41.3%) - 986 unique blocks found
+2025-07-02 21:42:49,161 - src.data_processing - INFO - Building block extraction: processed 122,552,320/295,246,830 rows (41.5%) - 987 unique blocks found
+2025-07-02 21:42:49,367 - src.data_processing - INFO - Building block extraction: processed 123,207,680/295,246,830 rows (41.7%) - 988 unique blocks found
+2025-07-02 21:42:49,609 - src.data_processing - INFO - Building block extraction: processed 123,863,040/295,246,830 rows (42.0%) - 988 unique blocks found
+2025-07-02 21:42:49,801 - src.data_processing - INFO - Building block extraction: processed 124,518,400/295,246,830 rows (42.2%) - 989 unique blocks found
+2025-07-02 21:42:50,004 - src.data_processing - INFO - Building block extraction: processed 125,173,760/295,246,830 rows (42.4%) - 989 unique blocks found
+2025-07-02 21:42:50,203 - src.data_processing - INFO - Building block extraction: processed 125,829,120/295,246,830 rows (42.6%) - 990 unique blocks found
+2025-07-02 21:42:50,449 - src.data_processing - INFO - Building block extraction: processed 126,484,480/295,246,830 rows (42.8%) - 991 unique blocks found
+2025-07-02 21:42:50,660 - src.data_processing - INFO - Building block extraction: processed 127,139,840/295,246,830 rows (43.1%) - 991 unique blocks found
+2025-07-02 21:42:50,854 - src.data_processing - INFO - Building block extraction: processed 127,795,200/295,246,830 rows (43.3%) - 992 unique blocks found
+2025-07-02 21:42:51,134 - src.data_processing - INFO - Building block extraction: processed 128,450,560/295,246,830 rows (43.5%) - 992 unique blocks found
+2025-07-02 21:42:51,368 - src.data_processing - INFO - Building block extraction: processed 129,105,920/295,246,830 rows (43.7%) - 993 unique blocks found
+2025-07-02 21:42:51,559 - src.data_processing - INFO - Building block extraction: processed 129,761,280/295,246,830 rows (44.0%) - 994 unique blocks found
+2025-07-02 21:42:51,802 - src.data_processing - INFO - Building block extraction: processed 130,416,640/295,246,830 rows (44.2%) - 994 unique blocks found
+2025-07-02 21:42:51,993 - src.data_processing - INFO - Building block extraction: processed 131,072,000/295,246,830 rows (44.4%) - 995 unique blocks found
+2025-07-02 21:42:52,227 - src.data_processing - INFO - Building block extraction: processed 131,727,360/295,246,830 rows (44.6%) - 995 unique blocks found
+2025-07-02 21:42:52,450 - src.data_processing - INFO - Building block extraction: processed 132,382,720/295,246,830 rows (44.8%) - 996 unique blocks found
+2025-07-02 21:42:52,642 - src.data_processing - INFO - Building block extraction: processed 133,038,080/295,246,830 rows (45.1%) - 997 unique blocks found
+2025-07-02 21:42:52,868 - src.data_processing - INFO - Building block extraction: processed 133,693,440/295,246,830 rows (45.3%) - 997 unique blocks found
+2025-07-02 21:42:53,082 - src.data_processing - INFO - Building block extraction: processed 134,348,800/295,246,830 rows (45.5%) - 998 unique blocks found
+2025-07-02 21:42:53,272 - src.data_processing - INFO - Building block extraction: processed 135,004,160/295,246,830 rows (45.7%) - 998 unique blocks found
+2025-07-02 21:42:53,479 - src.data_processing - INFO - Building block extraction: processed 135,659,520/295,246,830 rows (45.9%) - 999 unique blocks found
+2025-07-02 21:42:53,667 - src.data_processing - INFO - Building block extraction: processed 136,314,880/295,246,830 rows (46.2%) - 1,000 unique blocks found
+2025-07-02 21:42:53,896 - src.data_processing - INFO - Building block extraction: processed 136,970,240/295,246,830 rows (46.4%) - 1,000 unique blocks found
+2025-07-02 21:42:54,129 - src.data_processing - INFO - Building block extraction: processed 137,625,600/295,246,830 rows (46.6%) - 1,001 unique blocks found
+2025-07-02 21:42:54,319 - src.data_processing - INFO - Building block extraction: processed 138,280,960/295,246,830 rows (46.8%) - 1,001 unique blocks found
+2025-07-02 21:42:54,532 - src.data_processing - INFO - Building block extraction: processed 138,936,320/295,246,830 rows (47.1%) - 1,002 unique blocks found
+2025-07-02 21:42:54,753 - src.data_processing - INFO - Building block extraction: processed 139,591,680/295,246,830 rows (47.3%) - 1,003 unique blocks found
+2025-07-02 21:42:54,942 - src.data_processing - INFO - Building block extraction: processed 140,247,040/295,246,830 rows (47.5%) - 1,003 unique blocks found
+2025-07-02 21:42:55,137 - src.data_processing - INFO - Building block extraction: processed 140,902,400/295,246,830 rows (47.7%) - 1,004 unique blocks found
+2025-07-02 21:42:55,331 - src.data_processing - INFO - Building block extraction: processed 141,557,760/295,246,830 rows (47.9%) - 1,004 unique blocks found
+2025-07-02 21:42:55,545 - src.data_processing - INFO - Building block extraction: processed 142,213,120/295,246,830 rows (48.2%) - 1,005 unique blocks found
+2025-07-02 21:42:55,782 - src.data_processing - INFO - Building block extraction: processed 142,868,480/295,246,830 rows (48.4%) - 1,006 unique blocks found
+2025-07-02 21:42:55,971 - src.data_processing - INFO - Building block extraction: processed 143,523,840/295,246,830 rows (48.6%) - 1,006 unique blocks found
+2025-07-02 21:42:56,179 - src.data_processing - INFO - Building block extraction: processed 144,179,200/295,246,830 rows (48.8%) - 1,007 unique blocks found
+2025-07-02 21:42:56,405 - src.data_processing - INFO - Building block extraction: processed 144,834,560/295,246,830 rows (49.1%) - 1,007 unique blocks found
+2025-07-02 21:42:56,596 - src.data_processing - INFO - Building block extraction: processed 145,489,920/295,246,830 rows (49.3%) - 1,008 unique blocks found
+2025-07-02 21:42:56,805 - src.data_processing - INFO - Building block extraction: processed 146,145,280/295,246,830 rows (49.5%) - 1,009 unique blocks found
+2025-07-02 21:42:56,995 - src.data_processing - INFO - Building block extraction: processed 146,800,640/295,246,830 rows (49.7%) - 1,009 unique blocks found
+2025-07-02 21:42:57,539 - src.data_processing - INFO - Building block extraction: processed 147,456,000/295,246,830 rows (49.9%) - 1,010 unique blocks found
+2025-07-02 21:42:57,761 - src.data_processing - INFO - Building block extraction: processed 148,111,360/295,246,830 rows (50.2%) - 1,010 unique blocks found
+2025-07-02 21:42:57,950 - src.data_processing - INFO - Building block extraction: processed 148,766,720/295,246,830 rows (50.4%) - 1,011 unique blocks found
+2025-07-02 21:42:58,169 - src.data_processing - INFO - Building block extraction: processed 149,422,080/295,246,830 rows (50.6%) - 1,012 unique blocks found
+2025-07-02 21:42:58,385 - src.data_processing - INFO - Building block extraction: processed 150,077,440/295,246,830 rows (50.8%) - 1,012 unique blocks found
+2025-07-02 21:42:58,573 - src.data_processing - INFO - Building block extraction: processed 150,732,800/295,246,830 rows (51.1%) - 1,013 unique blocks found
+2025-07-02 21:42:58,778 - src.data_processing - INFO - Building block extraction: processed 151,388,160/295,246,830 rows (51.3%) - 1,013 unique blocks found
+2025-07-02 21:42:58,965 - src.data_processing - INFO - Building block extraction: processed 152,043,520/295,246,830 rows (51.5%) - 1,014 unique blocks found
+2025-07-02 21:42:59,182 - src.data_processing - INFO - Building block extraction: processed 152,698,880/295,246,830 rows (51.7%) - 1,015 unique blocks found
+2025-07-02 21:42:59,399 - src.data_processing - INFO - Building block extraction: processed 153,354,240/295,246,830 rows (51.9%) - 1,015 unique blocks found
+2025-07-02 21:42:59,589 - src.data_processing - INFO - Building block extraction: processed 154,009,600/295,246,830 rows (52.2%) - 1,016 unique blocks found
+2025-07-02 21:42:59,799 - src.data_processing - INFO - Building block extraction: processed 154,664,960/295,246,830 rows (52.4%) - 1,016 unique blocks found
+2025-07-02 21:43:00,006 - src.data_processing - INFO - Building block extraction: processed 155,320,320/295,246,830 rows (52.6%) - 1,017 unique blocks found
+2025-07-02 21:43:00,198 - src.data_processing - INFO - Building block extraction: processed 155,975,680/295,246,830 rows (52.8%) - 1,018 unique blocks found
+2025-07-02 21:43:00,414 - src.data_processing - INFO - Building block extraction: processed 156,631,040/295,246,830 rows (53.1%) - 1,018 unique blocks found
+2025-07-02 21:43:00,604 - src.data_processing - INFO - Building block extraction: processed 157,286,400/295,246,830 rows (53.3%) - 1,019 unique blocks found
+2025-07-02 21:43:00,839 - src.data_processing - INFO - Building block extraction: processed 157,941,760/295,246,830 rows (53.5%) - 1,019 unique blocks found
+2025-07-02 21:43:01,047 - src.data_processing - INFO - Building block extraction: processed 158,597,120/295,246,830 rows (53.7%) - 1,020 unique blocks found
+2025-07-02 21:43:01,235 - src.data_processing - INFO - Building block extraction: processed 159,252,480/295,246,830 rows (53.9%) - 1,021 unique blocks found
+2025-07-02 21:43:01,459 - src.data_processing - INFO - Building block extraction: processed 159,907,840/295,246,830 rows (54.2%) - 1,021 unique blocks found
+2025-07-02 21:43:01,676 - src.data_processing - INFO - Building block extraction: processed 160,563,200/295,246,830 rows (54.4%) - 1,022 unique blocks found
+2025-07-02 21:43:01,863 - src.data_processing - INFO - Building block extraction: processed 161,218,560/295,246,830 rows (54.6%) - 1,022 unique blocks found
+2025-07-02 21:43:02,064 - src.data_processing - INFO - Building block extraction: processed 161,873,920/295,246,830 rows (54.8%) - 1,023 unique blocks found
+2025-07-02 21:43:02,252 - src.data_processing - INFO - Building block extraction: processed 162,529,280/295,246,830 rows (55.0%) - 1,024 unique blocks found
+2025-07-02 21:43:02,481 - src.data_processing - INFO - Building block extraction: processed 163,184,640/295,246,830 rows (55.3%) - 1,024 unique blocks found
+2025-07-02 21:43:02,685 - src.data_processing - INFO - Building block extraction: processed 163,840,000/295,246,830 rows (55.5%) - 1,025 unique blocks found
+2025-07-02 21:43:02,873 - src.data_processing - INFO - Building block extraction: processed 164,495,360/295,246,830 rows (55.7%) - 1,025 unique blocks found
+2025-07-02 21:43:03,065 - src.data_processing - INFO - Building block extraction: processed 165,150,720/295,246,830 rows (55.9%) - 1,026 unique blocks found
+2025-07-02 21:43:03,274 - src.data_processing - INFO - Building block extraction: processed 165,806,080/295,246,830 rows (56.2%) - 1,027 unique blocks found
+2025-07-02 21:43:03,464 - src.data_processing - INFO - Building block extraction: processed 166,461,440/295,246,830 rows (56.4%) - 1,027 unique blocks found
+2025-07-02 21:43:03,682 - src.data_processing - INFO - Building block extraction: processed 167,116,800/295,246,830 rows (56.6%) - 1,028 unique blocks found
+2025-07-02 21:43:03,869 - src.data_processing - INFO - Building block extraction: processed 167,772,160/295,246,830 rows (56.8%) - 1,028 unique blocks found
+2025-07-02 21:43:04,059 - src.data_processing - INFO - Building block extraction: processed 168,427,520/295,246,830 rows (57.0%) - 1,029 unique blocks found
+2025-07-02 21:43:04,276 - src.data_processing - INFO - Building block extraction: processed 169,082,880/295,246,830 rows (57.3%) - 1,030 unique blocks found
+2025-07-02 21:43:04,461 - src.data_processing - INFO - Building block extraction: processed 169,738,240/295,246,830 rows (57.5%) - 1,030 unique blocks found
+2025-07-02 21:43:04,676 - src.data_processing - INFO - Building block extraction: processed 170,393,600/295,246,830 rows (57.7%) - 1,031 unique blocks found
+2025-07-02 21:43:04,910 - src.data_processing - INFO - Building block extraction: processed 171,048,960/295,246,830 rows (57.9%) - 1,032 unique blocks found
+2025-07-02 21:43:05,097 - src.data_processing - INFO - Building block extraction: processed 171,704,320/295,246,830 rows (58.2%) - 1,032 unique blocks found
+2025-07-02 21:43:05,332 - src.data_processing - INFO - Building block extraction: processed 172,359,680/295,246,830 rows (58.4%) - 1,033 unique blocks found
+2025-07-02 21:43:05,522 - src.data_processing - INFO - Building block extraction: processed 173,015,040/295,246,830 rows (58.6%) - 1,033 unique blocks found
+2025-07-02 21:43:05,739 - src.data_processing - INFO - Building block extraction: processed 173,670,400/295,246,830 rows (58.8%) - 1,034 unique blocks found
+2025-07-02 21:43:05,962 - src.data_processing - INFO - Building block extraction: processed 174,325,760/295,246,830 rows (59.0%) - 1,035 unique blocks found
+2025-07-02 21:43:06,151 - src.data_processing - INFO - Building block extraction: processed 174,981,120/295,246,830 rows (59.3%) - 1,035 unique blocks found
+2025-07-02 21:43:06,659 - src.data_processing - INFO - Building block extraction: processed 175,636,480/295,246,830 rows (59.5%) - 1,036 unique blocks found
+2025-07-02 21:43:06,880 - src.data_processing - INFO - Building block extraction: processed 176,291,840/295,246,830 rows (59.7%) - 1,036 unique blocks found
+2025-07-02 21:43:07,066 - src.data_processing - INFO - Building block extraction: processed 176,947,200/295,246,830 rows (59.9%) - 1,037 unique blocks found
+2025-07-02 21:43:07,270 - src.data_processing - INFO - Building block extraction: processed 177,602,560/295,246,830 rows (60.2%) - 1,038 unique blocks found
+2025-07-02 21:43:07,465 - src.data_processing - INFO - Building block extraction: processed 178,257,920/295,246,830 rows (60.4%) - 1,038 unique blocks found
+2025-07-02 21:43:07,721 - src.data_processing - INFO - Building block extraction: processed 178,913,280/295,246,830 rows (60.6%) - 1,039 unique blocks found
+2025-07-02 21:43:07,950 - src.data_processing - INFO - Building block extraction: processed 179,568,640/295,246,830 rows (60.8%) - 1,039 unique blocks found
+2025-07-02 21:43:08,138 - src.data_processing - INFO - Building block extraction: processed 180,224,000/295,246,830 rows (61.0%) - 1,040 unique blocks found
+2025-07-02 21:43:08,354 - src.data_processing - INFO - Building block extraction: processed 180,879,360/295,246,830 rows (61.3%) - 1,041 unique blocks found
+2025-07-02 21:43:08,564 - src.data_processing - INFO - Building block extraction: processed 181,534,720/295,246,830 rows (61.5%) - 1,041 unique blocks found
+2025-07-02 21:43:08,752 - src.data_processing - INFO - Building block extraction: processed 182,190,080/295,246,830 rows (61.7%) - 1,042 unique blocks found
+2025-07-02 21:43:08,964 - src.data_processing - INFO - Building block extraction: processed 182,845,440/295,246,830 rows (61.9%) - 1,042 unique blocks found
+2025-07-02 21:43:09,156 - src.data_processing - INFO - Building block extraction: processed 183,500,800/295,246,830 rows (62.2%) - 1,043 unique blocks found
+2025-07-02 21:43:09,374 - src.data_processing - INFO - Building block extraction: processed 184,156,160/295,246,830 rows (62.4%) - 1,044 unique blocks found
+2025-07-02 21:43:09,614 - src.data_processing - INFO - Building block extraction: processed 184,811,520/295,246,830 rows (62.6%) - 1,044 unique blocks found
+2025-07-02 21:43:09,802 - src.data_processing - INFO - Building block extraction: processed 185,466,880/295,246,830 rows (62.8%) - 1,045 unique blocks found
+2025-07-02 21:43:10,024 - src.data_processing - INFO - Building block extraction: processed 186,122,240/295,246,830 rows (63.0%) - 1,045 unique blocks found
+2025-07-02 21:43:10,249 - src.data_processing - INFO - Building block extraction: processed 186,777,600/295,246,830 rows (63.3%) - 1,046 unique blocks found
+2025-07-02 21:43:10,445 - src.data_processing - INFO - Building block extraction: processed 187,432,960/295,246,830 rows (63.5%) - 1,047 unique blocks found
+2025-07-02 21:43:10,652 - src.data_processing - INFO - Building block extraction: processed 188,088,320/295,246,830 rows (63.7%) - 1,047 unique blocks found
+2025-07-02 21:43:10,839 - src.data_processing - INFO - Building block extraction: processed 188,743,680/295,246,830 rows (63.9%) - 1,048 unique blocks found
+2025-07-02 21:43:11,145 - src.data_processing - INFO - Building block extraction: processed 189,399,040/295,246,830 rows (64.1%) - 1,048 unique blocks found
+2025-07-02 21:43:11,357 - src.data_processing - INFO - Building block extraction: processed 190,054,400/295,246,830 rows (64.4%) - 1,049 unique blocks found
+2025-07-02 21:43:11,544 - src.data_processing - INFO - Building block extraction: processed 190,709,760/295,246,830 rows (64.6%) - 1,050 unique blocks found
+2025-07-02 21:43:11,791 - src.data_processing - INFO - Building block extraction: processed 191,365,120/295,246,830 rows (64.8%) - 1,050 unique blocks found
+2025-07-02 21:43:11,998 - src.data_processing - INFO - Building block extraction: processed 192,020,480/295,246,830 rows (65.0%) - 1,051 unique blocks found
+2025-07-02 21:43:12,184 - src.data_processing - INFO - Building block extraction: processed 192,675,840/295,246,830 rows (65.3%) - 1,051 unique blocks found
+2025-07-02 21:43:12,530 - src.data_processing - INFO - Building block extraction: processed 193,331,200/295,246,830 rows (65.5%) - 1,052 unique blocks found
+2025-07-02 21:43:12,722 - src.data_processing - INFO - Building block extraction: processed 193,986,560/295,246,830 rows (65.7%) - 1,053 unique blocks found
+2025-07-02 21:43:12,974 - src.data_processing - INFO - Building block extraction: processed 194,641,920/295,246,830 rows (65.9%) - 1,053 unique blocks found
+2025-07-02 21:43:13,181 - src.data_processing - INFO - Building block extraction: processed 195,297,280/295,246,830 rows (66.1%) - 1,054 unique blocks found
+2025-07-02 21:43:13,367 - src.data_processing - INFO - Building block extraction: processed 195,952,640/295,246,830 rows (66.4%) - 1,054 unique blocks found
+2025-07-02 21:43:13,572 - src.data_processing - INFO - Building block extraction: processed 196,608,000/295,246,830 rows (66.6%) - 1,055 unique blocks found
+2025-07-02 21:43:13,791 - src.data_processing - INFO - Building block extraction: processed 197,263,360/295,246,830 rows (66.8%) - 1,056 unique blocks found
+2025-07-02 21:43:13,979 - src.data_processing - INFO - Building block extraction: processed 197,918,720/295,246,830 rows (67.0%) - 1,056 unique blocks found
+2025-07-02 21:43:14,190 - src.data_processing - INFO - Building block extraction: processed 198,574,080/295,246,830 rows (67.3%) - 1,057 unique blocks found
+2025-07-02 21:43:14,379 - src.data_processing - INFO - Building block extraction: processed 199,229,440/295,246,830 rows (67.5%) - 1,057 unique blocks found
+2025-07-02 21:43:14,570 - src.data_processing - INFO - Building block extraction: processed 199,884,800/295,246,830 rows (67.7%) - 1,058 unique blocks found
+2025-07-02 21:43:14,782 - src.data_processing - INFO - Building block extraction: processed 200,540,160/295,246,830 rows (67.9%) - 1,059 unique blocks found
+2025-07-02 21:43:14,971 - src.data_processing - INFO - Building block extraction: processed 201,195,520/295,246,830 rows (68.1%) - 1,059 unique blocks found
+2025-07-02 21:43:15,181 - src.data_processing - INFO - Building block extraction: processed 201,850,880/295,246,830 rows (68.4%) - 1,060 unique blocks found
+2025-07-02 21:43:15,383 - src.data_processing - INFO - Building block extraction: processed 202,506,240/295,246,830 rows (68.6%) - 1,060 unique blocks found
+2025-07-02 21:43:15,569 - src.data_processing - INFO - Building block extraction: processed 203,161,600/295,246,830 rows (68.8%) - 1,061 unique blocks found
+2025-07-02 21:43:15,766 - src.data_processing - INFO - Building block extraction: processed 203,816,960/295,246,830 rows (69.0%) - 1,062 unique blocks found
+2025-07-02 21:43:15,959 - src.data_processing - INFO - Building block extraction: processed 204,472,320/295,246,830 rows (69.3%) - 1,062 unique blocks found
+2025-07-02 21:43:16,187 - src.data_processing - INFO - Building block extraction: processed 205,127,680/295,246,830 rows (69.5%) - 1,063 unique blocks found
+2025-07-02 21:43:16,410 - src.data_processing - INFO - Building block extraction: processed 205,783,040/295,246,830 rows (69.7%) - 1,063 unique blocks found
+2025-07-02 21:43:16,600 - src.data_processing - INFO - Building block extraction: processed 206,438,400/295,246,830 rows (69.9%) - 1,064 unique blocks found
+2025-07-02 21:43:16,810 - src.data_processing - INFO - Building block extraction: processed 207,093,760/295,246,830 rows (70.1%) - 1,065 unique blocks found
+2025-07-02 21:43:17,047 - src.data_processing - INFO - Building block extraction: processed 207,749,120/295,246,830 rows (70.4%) - 1,065 unique blocks found
+2025-07-02 21:43:17,237 - src.data_processing - INFO - Building block extraction: processed 208,404,480/295,246,830 rows (70.6%) - 1,066 unique blocks found
+2025-07-02 21:43:17,462 - src.data_processing - INFO - Building block extraction: processed 209,059,840/295,246,830 rows (70.8%) - 1,066 unique blocks found
+2025-07-02 21:43:17,648 - src.data_processing - INFO - Building block extraction: processed 209,715,200/295,246,830 rows (71.0%) - 1,067 unique blocks found
+2025-07-02 21:43:17,859 - src.data_processing - INFO - Building block extraction: processed 210,370,560/295,246,830 rows (71.3%) - 1,068 unique blocks found
+2025-07-02 21:43:18,069 - src.data_processing - INFO - Building block extraction: processed 211,025,920/295,246,830 rows (71.5%) - 1,068 unique blocks found
+2025-07-02 21:43:18,258 - src.data_processing - INFO - Building block extraction: processed 211,681,280/295,246,830 rows (71.7%) - 1,069 unique blocks found
+2025-07-02 21:43:18,500 - src.data_processing - INFO - Building block extraction: processed 212,336,640/295,246,830 rows (71.9%) - 1,069 unique blocks found
+2025-07-02 21:43:18,729 - src.data_processing - INFO - Building block extraction: processed 212,992,000/295,246,830 rows (72.1%) - 1,070 unique blocks found
+2025-07-02 21:43:18,915 - src.data_processing - INFO - Building block extraction: processed 213,647,360/295,246,830 rows (72.4%) - 1,071 unique blocks found
+2025-07-02 21:43:19,123 - src.data_processing - INFO - Building block extraction: processed 214,302,720/295,246,830 rows (72.6%) - 1,071 unique blocks found
+2025-07-02 21:43:19,312 - src.data_processing - INFO - Building block extraction: processed 214,958,080/295,246,830 rows (72.8%) - 1,072 unique blocks found
+2025-07-02 21:43:19,528 - src.data_processing - INFO - Building block extraction: processed 215,613,440/295,246,830 rows (73.0%) - 1,072 unique blocks found
+2025-07-02 21:43:19,769 - src.data_processing - INFO - Building block extraction: processed 216,268,800/295,246,830 rows (73.3%) - 1,073 unique blocks found
+2025-07-02 21:43:19,960 - src.data_processing - INFO - Building block extraction: processed 216,924,160/295,246,830 rows (73.5%) - 1,074 unique blocks found
+2025-07-02 21:43:20,159 - src.data_processing - INFO - Building block extraction: processed 217,579,520/295,246,830 rows (73.7%) - 1,074 unique blocks found
+2025-07-02 21:43:20,365 - src.data_processing - INFO - Building block extraction: processed 218,234,880/295,246,830 rows (73.9%) - 1,075 unique blocks found
+2025-07-02 21:43:20,550 - src.data_processing - INFO - Building block extraction: processed 218,890,240/295,246,830 rows (74.1%) - 1,075 unique blocks found
+2025-07-02 21:43:20,761 - src.data_processing - INFO - Building block extraction: processed 219,545,600/295,246,830 rows (74.4%) - 1,076 unique blocks found
+2025-07-02 21:43:20,947 - src.data_processing - INFO - Building block extraction: processed 220,200,960/295,246,830 rows (74.6%) - 1,077 unique blocks found
+2025-07-02 21:43:21,359 - src.data_processing - INFO - Building block extraction: processed 220,856,320/295,246,830 rows (74.8%) - 1,077 unique blocks found
+2025-07-02 21:43:21,567 - src.data_processing - INFO - Building block extraction: processed 221,511,680/295,246,830 rows (75.0%) - 1,078 unique blocks found
+2025-07-02 21:43:21,752 - src.data_processing - INFO - Building block extraction: processed 222,167,040/295,246,830 rows (75.2%) - 1,078 unique blocks found
+2025-07-02 21:43:21,979 - src.data_processing - INFO - Building block extraction: processed 222,822,400/295,246,830 rows (75.5%) - 1,079 unique blocks found
+2025-07-02 21:43:22,208 - src.data_processing - INFO - Building block extraction: processed 223,477,760/295,246,830 rows (75.7%) - 1,080 unique blocks found
+2025-07-02 21:43:22,399 - src.data_processing - INFO - Building block extraction: processed 224,133,120/295,246,830 rows (75.9%) - 1,080 unique blocks found
+2025-07-02 21:43:22,620 - src.data_processing - INFO - Building block extraction: processed 224,788,480/295,246,830 rows (76.1%) - 1,081 unique blocks found
+2025-07-02 21:43:22,808 - src.data_processing - INFO - Building block extraction: processed 225,443,840/295,246,830 rows (76.4%) - 1,081 unique blocks found
+2025-07-02 21:43:23,197 - src.data_processing - INFO - Building block extraction: processed 226,099,200/295,246,830 rows (76.6%) - 1,082 unique blocks found
+2025-07-02 21:43:23,418 - src.data_processing - INFO - Building block extraction: processed 226,754,560/295,246,830 rows (76.8%) - 1,083 unique blocks found
+2025-07-02 21:43:23,607 - src.data_processing - INFO - Building block extraction: processed 227,409,920/295,246,830 rows (77.0%) - 1,083 unique blocks found
+2025-07-02 21:43:23,833 - src.data_processing - INFO - Building block extraction: processed 228,065,280/295,246,830 rows (77.2%) - 1,084 unique blocks found
+2025-07-02 21:43:24,085 - src.data_processing - INFO - Building block extraction: processed 228,720,640/295,246,830 rows (77.5%) - 1,084 unique blocks found
+2025-07-02 21:43:24,274 - src.data_processing - INFO - Building block extraction: processed 229,376,000/295,246,830 rows (77.7%) - 1,085 unique blocks found
+2025-07-02 21:43:24,493 - src.data_processing - INFO - Building block extraction: processed 230,031,360/295,246,830 rows (77.9%) - 1,086 unique blocks found
+2025-07-02 21:43:24,681 - src.data_processing - INFO - Building block extraction: processed 230,686,720/295,246,830 rows (78.1%) - 1,086 unique blocks found
+2025-07-02 21:43:24,883 - src.data_processing - INFO - Building block extraction: processed 231,342,080/295,246,830 rows (78.4%) - 1,087 unique blocks found
+2025-07-02 21:43:25,084 - src.data_processing - INFO - Building block extraction: processed 231,997,440/295,246,830 rows (78.6%) - 1,087 unique blocks found
+2025-07-02 21:43:25,267 - src.data_processing - INFO - Building block extraction: processed 232,652,800/295,246,830 rows (78.8%) - 1,088 unique blocks found
+2025-07-02 21:43:25,470 - src.data_processing - INFO - Building block extraction: processed 233,308,160/295,246,830 rows (79.0%) - 1,089 unique blocks found
+2025-07-02 21:43:25,698 - src.data_processing - INFO - Building block extraction: processed 233,963,520/295,246,830 rows (79.2%) - 1,089 unique blocks found
+2025-07-02 21:43:25,882 - src.data_processing - INFO - Building block extraction: processed 234,618,880/295,246,830 rows (79.5%) - 1,090 unique blocks found
+2025-07-02 21:43:26,088 - src.data_processing - INFO - Building block extraction: processed 235,274,240/295,246,830 rows (79.7%) - 1,090 unique blocks found
+2025-07-02 21:43:26,275 - src.data_processing - INFO - Building block extraction: processed 235,929,600/295,246,830 rows (79.9%) - 1,091 unique blocks found
+2025-07-02 21:43:26,482 - src.data_processing - INFO - Building block extraction: processed 236,584,960/295,246,830 rows (80.1%) - 1,092 unique blocks found
+2025-07-02 21:43:26,706 - src.data_processing - INFO - Building block extraction: processed 237,240,320/295,246,830 rows (80.4%) - 1,092 unique blocks found
+2025-07-02 21:43:26,891 - src.data_processing - INFO - Building block extraction: processed 237,895,680/295,246,830 rows (80.6%) - 1,093 unique blocks found
+2025-07-02 21:43:27,088 - src.data_processing - INFO - Building block extraction: processed 238,551,040/295,246,830 rows (80.8%) - 1,093 unique blocks found
+2025-07-02 21:43:27,312 - src.data_processing - INFO - Building block extraction: processed 239,206,400/295,246,830 rows (81.0%) - 1,094 unique blocks found
+2025-07-02 21:43:27,498 - src.data_processing - INFO - Building block extraction: processed 239,861,760/295,246,830 rows (81.2%) - 1,095 unique blocks found
+2025-07-02 21:43:27,726 - src.data_processing - INFO - Building block extraction: processed 240,517,120/295,246,830 rows (81.5%) - 1,095 unique blocks found
+2025-07-02 21:43:27,912 - src.data_processing - INFO - Building block extraction: processed 241,172,480/295,246,830 rows (81.7%) - 1,096 unique blocks found
+2025-07-02 21:43:28,179 - src.data_processing - INFO - Building block extraction: processed 241,827,840/295,246,830 rows (81.9%) - 1,096 unique blocks found
+2025-07-02 21:43:28,413 - src.data_processing - INFO - Building block extraction: processed 242,483,200/295,246,830 rows (82.1%) - 1,097 unique blocks found
+2025-07-02 21:43:28,606 - src.data_processing - INFO - Building block extraction: processed 243,138,560/295,246,830 rows (82.4%) - 1,098 unique blocks found
+2025-07-02 21:43:28,829 - src.data_processing - INFO - Building block extraction: processed 243,793,920/295,246,830 rows (82.6%) - 1,098 unique blocks found
+2025-07-02 21:43:29,071 - src.data_processing - INFO - Building block extraction: processed 244,449,280/295,246,830 rows (82.8%) - 1,099 unique blocks found
+2025-07-02 21:43:29,271 - src.data_processing - INFO - Building block extraction: processed 245,104,640/295,246,830 rows (83.0%) - 1,099 unique blocks found
+2025-07-02 21:43:29,491 - src.data_processing - INFO - Building block extraction: processed 245,760,000/295,246,830 rows (83.2%) - 1,100 unique blocks found
+2025-07-02 21:43:29,687 - src.data_processing - INFO - Building block extraction: processed 246,415,360/295,246,830 rows (83.5%) - 1,101 unique blocks found
+2025-07-02 21:43:29,907 - src.data_processing - INFO - Building block extraction: processed 247,070,720/295,246,830 rows (83.7%) - 1,101 unique blocks found
+2025-07-02 21:43:30,118 - src.data_processing - INFO - Building block extraction: processed 247,726,080/295,246,830 rows (83.9%) - 1,102 unique blocks found
+2025-07-02 21:43:30,314 - src.data_processing - INFO - Building block extraction: processed 248,381,440/295,246,830 rows (84.1%) - 1,102 unique blocks found
+2025-07-02 21:43:30,528 - src.data_processing - INFO - Building block extraction: processed 249,036,800/295,246,830 rows (84.3%) - 1,103 unique blocks found
+2025-07-02 21:43:30,744 - src.data_processing - INFO - Building block extraction: processed 249,692,160/295,246,830 rows (84.6%) - 1,104 unique blocks found
+2025-07-02 21:43:30,937 - src.data_processing - INFO - Building block extraction: processed 250,347,520/295,246,830 rows (84.8%) - 1,104 unique blocks found
+2025-07-02 21:43:31,179 - src.data_processing - INFO - Building block extraction: processed 251,002,880/295,246,830 rows (85.0%) - 1,105 unique blocks found
+2025-07-02 21:43:31,396 - src.data_processing - INFO - Building block extraction: processed 251,658,240/295,246,830 rows (85.2%) - 1,105 unique blocks found
+2025-07-02 21:43:31,693 - src.data_processing - INFO - Building block extraction: processed 252,313,600/295,246,830 rows (85.5%) - 1,106 unique blocks found
+2025-07-02 21:43:31,934 - src.data_processing - INFO - Building block extraction: processed 252,968,960/295,246,830 rows (85.7%) - 1,107 unique blocks found
+2025-07-02 21:43:32,126 - src.data_processing - INFO - Building block extraction: processed 253,624,320/295,246,830 rows (85.9%) - 1,107 unique blocks found
+2025-07-02 21:43:32,356 - src.data_processing - INFO - Building block extraction: processed 254,279,680/295,246,830 rows (86.1%) - 1,108 unique blocks found
+2025-07-02 21:43:32,561 - src.data_processing - INFO - Building block extraction: processed 254,935,040/295,246,830 rows (86.3%) - 1,109 unique blocks found
+2025-07-02 21:43:32,755 - src.data_processing - INFO - Building block extraction: processed 255,590,400/295,246,830 rows (86.6%) - 1,109 unique blocks found
+2025-07-02 21:43:32,981 - src.data_processing - INFO - Building block extraction: processed 256,245,760/295,246,830 rows (86.8%) - 1,110 unique blocks found
+2025-07-02 21:43:33,179 - src.data_processing - INFO - Building block extraction: processed 256,901,120/295,246,830 rows (87.0%) - 1,110 unique blocks found
+2025-07-02 21:43:33,397 - src.data_processing - INFO - Building block extraction: processed 257,556,480/295,246,830 rows (87.2%) - 1,111 unique blocks found
+2025-07-02 21:43:33,628 - src.data_processing - INFO - Building block extraction: processed 258,211,840/295,246,830 rows (87.5%) - 1,112 unique blocks found
+2025-07-02 21:43:33,823 - src.data_processing - INFO - Building block extraction: processed 258,867,200/295,246,830 rows (87.7%) - 1,112 unique blocks found
+2025-07-02 21:43:34,043 - src.data_processing - INFO - Building block extraction: processed 259,522,560/295,246,830 rows (87.9%) - 1,113 unique blocks found
+2025-07-02 21:43:34,302 - src.data_processing - INFO - Building block extraction: processed 260,177,920/295,246,830 rows (88.1%) - 1,113 unique blocks found
+2025-07-02 21:43:34,501 - src.data_processing - INFO - Building block extraction: processed 260,833,280/295,246,830 rows (88.3%) - 1,114 unique blocks found
+2025-07-02 21:43:34,726 - src.data_processing - INFO - Building block extraction: processed 261,488,640/295,246,830 rows (88.6%) - 1,115 unique blocks found
+2025-07-02 21:43:34,914 - src.data_processing - INFO - Building block extraction: processed 262,144,000/295,246,830 rows (88.8%) - 1,115 unique blocks found
+2025-07-02 21:43:35,115 - src.data_processing - INFO - Building block extraction: processed 262,799,360/295,246,830 rows (89.0%) - 1,116 unique blocks found
+2025-07-02 21:43:35,332 - src.data_processing - INFO - Building block extraction: processed 263,454,720/295,246,830 rows (89.2%) - 1,116 unique blocks found
+2025-07-02 21:43:35,530 - src.data_processing - INFO - Building block extraction: processed 264,110,080/295,246,830 rows (89.5%) - 1,117 unique blocks found
+2025-07-02 21:43:35,741 - src.data_processing - INFO - Building block extraction: processed 264,765,440/295,246,830 rows (89.7%) - 1,118 unique blocks found
+2025-07-02 21:43:35,968 - src.data_processing - INFO - Building block extraction: processed 265,420,800/295,246,830 rows (89.9%) - 1,118 unique blocks found
+2025-07-02 21:43:36,163 - src.data_processing - INFO - Building block extraction: processed 266,076,160/295,246,830 rows (90.1%) - 1,119 unique blocks found
+2025-07-02 21:43:36,400 - src.data_processing - INFO - Building block extraction: processed 266,731,520/295,246,830 rows (90.3%) - 1,119 unique blocks found
+2025-07-02 21:43:36,596 - src.data_processing - INFO - Building block extraction: processed 267,386,880/295,246,830 rows (90.6%) - 1,120 unique blocks found
+2025-07-02 21:43:36,813 - src.data_processing - INFO - Building block extraction: processed 268,042,240/295,246,830 rows (90.8%) - 1,121 unique blocks found
+2025-07-02 21:43:37,045 - src.data_processing - INFO - Building block extraction: processed 268,697,600/295,246,830 rows (91.0%) - 1,121 unique blocks found
+2025-07-02 21:43:37,237 - src.data_processing - INFO - Building block extraction: processed 269,352,960/295,246,830 rows (91.2%) - 1,122 unique blocks found
+2025-07-02 21:43:37,475 - src.data_processing - INFO - Building block extraction: processed 270,008,320/295,246,830 rows (91.5%) - 1,122 unique blocks found
+2025-07-02 21:43:37,689 - src.data_processing - INFO - Building block extraction: processed 270,663,680/295,246,830 rows (91.7%) - 1,123 unique blocks found
+2025-07-02 21:43:37,883 - src.data_processing - INFO - Building block extraction: processed 271,319,040/295,246,830 rows (91.9%) - 1,124 unique blocks found
+2025-07-02 21:43:38,142 - src.data_processing - INFO - Building block extraction: processed 271,974,400/295,246,830 rows (92.1%) - 1,124 unique blocks found
+2025-07-02 21:43:38,348 - src.data_processing - INFO - Building block extraction: processed 272,629,760/295,246,830 rows (92.3%) - 1,125 unique blocks found
+2025-07-02 21:43:38,859 - src.data_processing - INFO - Building block extraction: processed 273,285,120/295,246,830 rows (92.6%) - 1,125 unique blocks found
+2025-07-02 21:43:39,096 - src.data_processing - INFO - Building block extraction: processed 273,940,480/295,246,830 rows (92.8%) - 1,126 unique blocks found
+2025-07-02 21:43:39,289 - src.data_processing - INFO - Building block extraction: processed 274,595,840/295,246,830 rows (93.0%) - 1,127 unique blocks found
+2025-07-02 21:43:39,523 - src.data_processing - INFO - Building block extraction: processed 275,251,200/295,246,830 rows (93.2%) - 1,127 unique blocks found
+2025-07-02 21:43:39,741 - src.data_processing - INFO - Building block extraction: processed 275,906,560/295,246,830 rows (93.4%) - 1,128 unique blocks found
+2025-07-02 21:43:39,926 - src.data_processing - INFO - Building block extraction: processed 276,561,920/295,246,830 rows (93.7%) - 1,128 unique blocks found
+2025-07-02 21:43:40,141 - src.data_processing - INFO - Building block extraction: processed 277,217,280/295,246,830 rows (93.9%) - 1,129 unique blocks found
+2025-07-02 21:43:40,332 - src.data_processing - INFO - Building block extraction: processed 277,872,640/295,246,830 rows (94.1%) - 1,130 unique blocks found
+2025-07-02 21:43:40,557 - src.data_processing - INFO - Building block extraction: processed 278,528,000/295,246,830 rows (94.3%) - 1,130 unique blocks found
+2025-07-02 21:43:40,749 - src.data_processing - INFO - Building block extraction: processed 279,183,360/295,246,830 rows (94.6%) - 1,131 unique blocks found
+2025-07-02 21:43:40,936 - src.data_processing - INFO - Building block extraction: processed 279,838,720/295,246,830 rows (94.8%) - 1,131 unique blocks found
+2025-07-02 21:43:41,159 - src.data_processing - INFO - Building block extraction: processed 280,494,080/295,246,830 rows (95.0%) - 1,132 unique blocks found
+2025-07-02 21:43:41,373 - src.data_processing - INFO - Building block extraction: processed 281,149,440/295,246,830 rows (95.2%) - 1,133 unique blocks found
+2025-07-02 21:43:41,572 - src.data_processing - INFO - Building block extraction: processed 281,804,800/295,246,830 rows (95.4%) - 1,133 unique blocks found
+2025-07-02 21:43:41,781 - src.data_processing - INFO - Building block extraction: processed 282,460,160/295,246,830 rows (95.7%) - 1,134 unique blocks found
+2025-07-02 21:43:41,967 - src.data_processing - INFO - Building block extraction: processed 283,115,520/295,246,830 rows (95.9%) - 1,134 unique blocks found
+2025-07-02 21:43:42,196 - src.data_processing - INFO - Building block extraction: processed 283,770,880/295,246,830 rows (96.1%) - 1,135 unique blocks found
+2025-07-02 21:43:42,428 - src.data_processing - INFO - Building block extraction: processed 284,426,240/295,246,830 rows (96.3%) - 1,136 unique blocks found
+2025-07-02 21:43:42,622 - src.data_processing - INFO - Building block extraction: processed 285,081,600/295,246,830 rows (96.6%) - 1,136 unique blocks found
+2025-07-02 21:43:42,837 - src.data_processing - INFO - Building block extraction: processed 285,736,960/295,246,830 rows (96.8%) - 1,137 unique blocks found
+2025-07-02 21:43:43,209 - src.data_processing - INFO - Building block extraction: processed 286,392,320/295,246,830 rows (97.0%) - 1,137 unique blocks found
+2025-07-02 21:43:43,401 - src.data_processing - INFO - Building block extraction: processed 287,047,680/295,246,830 rows (97.2%) - 1,138 unique blocks found
+2025-07-02 21:43:43,657 - src.data_processing - INFO - Building block extraction: processed 287,703,040/295,246,830 rows (97.4%) - 1,139 unique blocks found
+2025-07-02 21:43:43,847 - src.data_processing - INFO - Building block extraction: processed 288,358,400/295,246,830 rows (97.7%) - 1,139 unique blocks found
+2025-07-02 21:43:44,069 - src.data_processing - INFO - Building block extraction: processed 289,013,760/295,246,830 rows (97.9%) - 1,140 unique blocks found
+2025-07-02 21:43:44,282 - src.data_processing - INFO - Building block extraction: processed 289,669,120/295,246,830 rows (98.1%) - 1,140 unique blocks found
+2025-07-02 21:43:44,467 - src.data_processing - INFO - Building block extraction: processed 290,324,480/295,246,830 rows (98.3%) - 1,141 unique blocks found
+2025-07-02 21:43:44,686 - src.data_processing - INFO - Building block extraction: processed 290,979,840/295,246,830 rows (98.6%) - 1,142 unique blocks found
+2025-07-02 21:43:44,881 - src.data_processing - INFO - Building block extraction: processed 291,635,200/295,246,830 rows (98.8%) - 1,142 unique blocks found
+2025-07-02 21:43:45,069 - src.data_processing - INFO - Building block extraction: processed 292,290,560/295,246,830 rows (99.0%) - 1,143 unique blocks found
+2025-07-02 21:43:45,285 - src.data_processing - INFO - Building block extraction: processed 292,945,920/295,246,830 rows (99.2%) - 1,143 unique blocks found
+2025-07-02 21:43:45,476 - src.data_processing - INFO - Building block extraction: processed 293,601,280/295,246,830 rows (99.4%) - 1,144 unique blocks found
+2025-07-02 21:43:45,698 - src.data_processing - INFO - Building block extraction: processed 294,256,640/295,246,830 rows (99.7%) - 1,145 unique blocks found
+2025-07-02 21:43:45,916 - src.data_processing - INFO - Building block extraction: processed 294,912,000/295,246,830 rows (99.9%) - 1,145 unique blocks found
+✓ Validation blocks selected: 35 blocks
+Processing 'train' dataset...
+Reading 'train.parquet' and writing pivoted chunks to '/pub/ddlin/projects/belka_del/data/raw/temp_processing/train_chunks' (DEBUG: max 3 chunks)...
+  Processed chunk 1/3 (33.3%) - 10,667 rows
+[After chunk 1            ] Memory Usage: 7.1GB / 188.1GB (4.7%)
+  Processed chunk 2/3 (66.7%) - 21,335 rows
+[After chunk 2            ] Memory Usage: 7.2GB / 188.1GB (4.7%)
+  Processed chunk 3/3 (100.0%) - 32,002 rows
+[After chunk 3            ] Memory Usage: 7.2GB / 188.1GB (4.7%)
+DEBUG: Stopping after 3 chunks (processed 32002 rows)
+✓ Finished pivoting 'train.parquet' (DEBUG mode): 32002 rows in 3 chunks.
+  Loading Dask DataFrame for 'train'...
+  Applying transformations to 'train'...
+2025-07-02 21:43:48,309 - src.data_processing - INFO - System Resources Dask graph for 'train':
+2025-07-02 21:43:48,309 - src.data_processing - INFO -   Memory: 7.18GB/188.06GB (4.7%)
+2025-07-02 21:43:48,309 - src.data_processing - INFO -   CPU: 22.2% (40 cores)
+2025-07-02 21:43:48,309 - src.data_processing - INFO -   Disk: 134.42GB/213.10GB (63.1%)
+2025-07-02 21:43:48,309 - src.data_processing - INFO -   Disk I/O: 8.80GB read, 38.40GB written
+[Dask graph for 'train'   ] Memory Usage: 7.2GB/188.1GB (4.7%)
+Processing 'test' dataset...
+Reading 'test.parquet' and writing pivoted chunks to '/pub/ddlin/projects/belka_del/data/raw/temp_processing/test_chunks' (DEBUG: max 3 chunks)...
+  Processed chunk 1/2 (50.0%) - 10,667 rows
+[After chunk 1            ] Memory Usage: 7.2GB / 188.1GB (4.7%)
+  Processed chunk 2/2 (100.0%) - 24,921 rows
+[After chunk 2            ] Memory Usage: 7.2GB / 188.1GB (4.7%)
+  Processed chunk 3/2 (150.0%) - 56,107 rows
+[After chunk 3            ] Memory Usage: 7.2GB / 188.1GB (4.7%)
+DEBUG: Stopping after 3 chunks (processed 56107 rows)
+✓ Finished pivoting 'test.parquet' (DEBUG mode): 56107 rows in 3 chunks.
+  Loading Dask DataFrame for 'test'...
+  Applying transformations to 'test'...
+2025-07-02 21:43:50,372 - src.data_processing - INFO - System Resources Dask graph for 'test':
+2025-07-02 21:43:50,372 - src.data_processing - INFO -   Memory: 7.20GB/188.06GB (4.7%)
+2025-07-02 21:43:50,372 - src.data_processing - INFO -   CPU: 22.3% (40 cores)
+2025-07-02 21:43:50,372 - src.data_processing - INFO -   Disk: 134.42GB/213.10GB (63.1%)
+2025-07-02 21:43:50,372 - src.data_processing - INFO -   Disk I/O: 8.80GB read, 38.40GB written
+[Dask graph for 'test'    ] Memory Usage: 7.2GB/188.1GB (4.7%)
+Processing 'extra' (DNA) data with Dask...
+2025-07-02 21:43:51,439 - src.data_processing - INFO - System Resources Dask graph for 'extra':
+2025-07-02 21:43:51,439 - src.data_processing - INFO -   Memory: 7.20GB/188.06GB (4.7%)
+2025-07-02 21:43:51,439 - src.data_processing - INFO -   CPU: 22.3% (40 cores)
+2025-07-02 21:43:51,439 - src.data_processing - INFO -   Disk: 134.42GB/213.10GB (63.1%)
+2025-07-02 21:43:51,439 - src.data_processing - INFO -   Disk I/O: 8.80GB read, 38.40GB written
+[Dask graph for 'extra'   ] Memory Usage: 7.2GB/188.1GB (4.7%)
+Combining all datasets with Dask...
+Shuffling combined data...
+Writing final parquet file to: /pub/ddlin/projects/belka_del/data/raw/belka.parquet
+2025-07-02 21:43:52,448 - src.data_processing - INFO - System Resources Before final to_parquet:
+2025-07-02 21:43:52,448 - src.data_processing - INFO -   Memory: 7.20GB/188.06GB (4.7%)
+2025-07-02 21:43:52,448 - src.data_processing - INFO -   CPU: 22.3% (40 cores)
+2025-07-02 21:43:52,448 - src.data_processing - INFO -   Disk: 134.42GB/213.10GB (63.1%)
+2025-07-02 21:43:52,448 - src.data_processing - INFO -   Disk I/O: 8.80GB read, 38.40GB written
+[Before final to_parquet  ] Memory Usage: 7.2GB/188.1GB (4.7%)
+DataFrame columns before parquet write: ['smiles', 'binds', 'smiles_no_linker', 'subset']
+2025-07-02 22:11:59,868 - src.data_processing - INFO - System Resources After final to_parquet:
+2025-07-02 22:11:59,868 - src.data_processing - INFO -   Memory: 9.16GB/188.06GB (5.7%)
+2025-07-02 22:11:59,868 - src.data_processing - INFO -   CPU: 22.5% (40 cores)
+2025-07-02 22:11:59,868 - src.data_processing - INFO -   Disk: 134.42GB/213.10GB (63.1%)
+2025-07-02 22:11:59,868 - src.data_processing - INFO -   Disk I/O: 8.87GB read, 38.67GB written
+[After final to_parquet   ] Memory Usage: 9.2GB/188.1GB (5.7%)
+Cleaning up temporary files...
+2025-07-02 22:11:59,888 - src.data_processing - INFO - make_parquet pipeline completed in 1791.37 seconds
+
+✓ Parquet creation completed successfully: /pub/ddlin/projects/belka_del/data/raw/belka.parquet
+Total pipeline time: 1791.37 seconds
+2025-07-02 22:11:59,890 - root - INFO - Parquet generation completed successfully
+2025-07-02 22:11:59,890 - root - INFO - Step: Extract Vocabulary
+Reading parquet file with Dask to extract vocabulary...
+2025-07-02 22:11:59,891 - src.data_processing - INFO - Loading parquet file for vocabulary extraction
+2025-07-02 22:11:59,939 - src.data_processing - INFO - Vocabulary extraction: processing 20 partitions
+2025-07-02 22:11:59,939 - src.data_processing - INFO - Applying tokenization to all partitions...
+2025-07-02 22:13:20,145 - src.data_processing - INFO - Combining unique tokens from all partitions...
+2025-07-02 22:13:20,146 - src.data_processing - INFO - Saving vocabulary to /pub/ddlin/projects/belka_del/data/raw/vocab.txt
+2025-07-02 22:13:20,217 - src.data_processing - INFO - Vocabulary extraction completed: 39 unique tokens saved
+Vocabulary saved to: /pub/ddlin/projects/belka_del/data/raw/vocab.txt (39 tokens)
+2025-07-02 22:13:20,218 - root - INFO - Vocabulary file created: /pub/ddlin/projects/belka_del/data/raw/vocab.txt
+2025-07-02 22:13:20,218 - root - INFO - CPU Preprocessing completed successfully.
+2025-07-02 22:13:20,218 - root - INFO - Pipeline execution completed successfully
+Preprocessing completed successfully!
+Verifying local output files...
+✗ belka.parquet not found

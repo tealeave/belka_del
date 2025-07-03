@@ -12,21 +12,16 @@
 # Runs Steps 3-6: TFRecord Dataset + Training + Submission
 # Reads preprocessed data from shared storage staging area
 
-echo "=============================================="
-echo "Belka Transformer - GPU Cluster Training"
-echo "Job ID: $SLURM_JOB_ID"
-echo "Node: $SLURMD_NODENAME"
-echo "GPU: $CUDA_VISIBLE_DEVICES"
-echo "Start time: $(date)"
-echo "=============================================="
+# Initialize Python utilities and job tracking
+poetry run python scripts/slurm_utils.py --cluster-type gpu job-start "belka_gpu_training"
 
 # Environment setup
 module load python/3.10.2
 module load cuda/11.8     # Adjust CUDA version as needed
 module load cudnn/8.6     # Adjust cuDNN version as needed
 
-# Create logs directory
-mkdir -p logs
+# Create standard directories using Python utilities  
+poetry run python scripts/slurm_utils.py --cluster-type gpu create-dirs
 
 # Set environment variables for GPU optimization
 export CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
@@ -76,42 +71,21 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Check for CPU preprocessing completion
-echo "Checking for CPU preprocessing completion..."
-if [ ! -f "data/raw/belka.parquet" ] || [ ! -f "data/raw/vocab.txt" ]; then
-    echo "ERROR: Required preprocessing files not found"
-    echo "Expected files:"
-    echo "  - data/raw/belka.parquet"
-    echo "  - data/raw/vocab.txt"
-    echo ""
+# Validate output files from CPU preprocessing using Python utilities
+echo "Validating CPU preprocessing outputs..."
+poetry run python scripts/slurm_utils.py --cluster-type gpu validate-outputs
+if [ $? -ne 0 ]; then
+    echo "ERROR: CPU preprocessing output validation failed"
     echo "CPU preprocessing must complete first. Run:"
     echo "sbatch slurm/job_cpu_preprocess.sh"
     exit 1
 fi
 
-echo "✓ CPU preprocessing files found locally"
-
-# Verify required input files are available locally
-echo "Verifying required input files..."
-if [ ! -f "data/raw/belka.parquet" ] || [ ! -f "data/raw/vocab.txt" ]; then
-    echo "ERROR: Required files not found in data/raw/"
-    echo "Expected files:"
-    echo "  - data/raw/belka.parquet"
-    echo "  - data/raw/vocab.txt"
-    exit 1
-fi
-
-echo "✓ All required files found locally"
-echo "Local file sizes:"
-echo "- belka.parquet: $(du -h data/raw/belka.parquet | cut -f1)"
-echo "- vocab.txt: $(du -h data/raw/vocab.txt | cut -f1) ($(wc -l < data/raw/vocab.txt) tokens)"
-
 # Set training mode (default to classification)
 TRAINING_MODE=${1:-clf}
 echo "Training mode: $TRAINING_MODE"
 
-# Create output directories
-mkdir -p models checkpoints results
+# Output directories already created by Python utilities above
 
 # Run TensorFlow pipeline
 echo "=============================================="
@@ -202,6 +176,8 @@ else
         tail -20 logs/gpu_training_${SLURM_JOB_ID}.log
     fi
     
+    # Log failed job completion
+    poetry run python scripts/slurm_utils.py --cluster-type gpu job-end "belka_gpu_training" --exit-code $? --error-message "TensorFlow pipeline failed" --save-report
     exit 1
 fi
 
@@ -213,6 +189,7 @@ echo "GPU TRAINING COMPLETED SUCCESSFULLY"
 echo "Training mode: $TRAINING_MODE"
 echo "Final model: $LATEST_MODEL"
 echo "Results saved locally in repository"
-echo "End time: $(date)"
-echo "Total job duration: $(squeue -j $SLURM_JOB_ID -h -o %M 2>/dev/null || echo 'N/A')"
 echo "=============================================="
+
+# Log successful job completion
+poetry run python scripts/slurm_utils.py --cluster-type gpu job-end "belka_gpu_training" --exit-code 0 --save-report

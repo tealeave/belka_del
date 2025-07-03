@@ -2,8 +2,8 @@
 #SBATCH --job-name=belka_debug
 #SBATCH --partition=free
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=64GB
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128GB
 #SBATCH --time=00:10:00
 #SBATCH --output=logs/cpu_preprocess_debug_%j.out
 #SBATCH --error=logs/cpu_preprocess_debug_%j.err
@@ -12,13 +12,8 @@
 # Quick testing with minimal resources - processes only 3 chunks (~30 seconds)
 # Perfect for development, testing fixes, and code validation
 
-echo "=============================================="
-echo "Belka Transformer - DEBUG MODE Preprocessing"
-echo "Job ID: $SLURM_JOB_ID"
-echo "Node: $SLURMD_NODENAME"
-echo "Start time: $(date)"
-echo "⚠️  DEBUG MODE: Processing only 3 chunks for quick testing"
-echo "=============================================="
+# Initialize Python utilities and job tracking
+poetry run python scripts/slurm_utils.py --cluster-type cpu job-start "belka_preprocess_debug"
 
 # Environment setup
 module load python/3.10.2
@@ -39,8 +34,8 @@ echo "Using Python: $(which python)"
 echo "Python version: $(python --version)"
 echo "Poetry version: $(poetry --version)"
 
-# Create logs directory if it doesn't exist
-mkdir -p logs
+# Create standard directories using Python utilities
+poetry run python scripts/slurm_utils.py --cluster-type cpu create-dirs
 
 # Set environment variables for optimal CPU performance
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
@@ -64,30 +59,22 @@ echo "Available CPU cores: $SLURM_CPUS_PER_TASK"
 echo "Allocated memory: ${SLURM_MEM_PER_NODE}MB"
 echo "Processing locally within repository"
 
-# Ensure local data directories exist
-mkdir -p data/raw
-mkdir -p data/processed
+# Directories already created by Python utilities above
 
-# Check for required data files
-echo "Checking for required input files..."
-if [ ! -f "data/raw/train.parquet" ]; then
-    echo "ERROR: data/raw/train.parquet not found"
+# Validate required input files using Python utilities
+poetry run python scripts/slurm_utils.py --cluster-type cpu validate-inputs
+if [ $? -ne 0 ]; then
+    echo "ERROR: Input file validation failed"
     exit 1
 fi
-if [ ! -f "data/raw/test.parquet" ]; then
-    echo "ERROR: data/raw/test.parquet not found"
-    exit 1
-fi
-if [ ! -f "data/raw/DNA_Labeled_Data.csv" ]; then
-    echo "ERROR: data/raw/DNA_Labeled_Data.csv not found"
-    exit 1
-fi
-echo "All required input files found."
 
-# Clean any previous processed data
-echo "Cleaning previous processed data..."
-rm -f data/raw/belka.parquet
-rm -f data/raw/vocab.txt
+# Clean previous processed data safely using Python utilities
+poetry run python scripts/slurm_utils.py --cluster-type cpu clean
+if [ $? -ne 0 ]; then
+    echo "ERROR: Cleanup failed - check logs for details"
+    poetry run python scripts/slurm_utils.py --cluster-type cpu job-end "belka_preprocess_debug" --exit-code 1 --error-message "Cleanup failed - existing output files detected"
+    exit 1
+fi
 
 # Run DEBUG preprocessing pipeline
 echo "Starting DEBUG preprocessing pipeline..."
@@ -103,36 +90,33 @@ time poetry run python scripts/pipeline.py \
 if [ $? -eq 0 ]; then
     echo "✅ DEBUG preprocessing completed successfully!"
     
-    # Verify output files exist locally
-    echo "Verifying local output files..."
-    if [ -f "data/raw/belka.parquet" ]; then
-        echo "✓ belka.parquet created ($(du -h data/raw/belka.parquet | cut -f1))"
-    else
-        echo "✗ belka.parquet not found"
-        exit 1
-    fi
-    
-    if [ -f "data/raw/vocab.txt" ]; then
-        echo "✓ vocab.txt created ($(wc -l < data/raw/vocab.txt) tokens)"
-    else
-        echo "✗ vocab.txt not found"
+    # Verify output files using Python utilities
+    echo "Verifying output files..."
+    poetry run python scripts/slurm_utils.py --cluster-type cpu validate-outputs
+    if [ $? -ne 0 ]; then
+        echo "✗ Output file validation failed"
+        poetry run python scripts/slurm_utils.py --cluster-type cpu job-end "belka_preprocess_debug" --exit-code 1 --error-message "Output validation failed"
         exit 1
     fi
     
     echo "=============================================="
     echo "🧪 DEBUG PREPROCESSING COMPLETED SUCCESSFULLY"
     echo "Files created (debug subset):"
-    echo "- belka.parquet: $(du -h data/raw/belka.parquet | cut -f1)"
+    echo "- belka.parquet: $(du -sh data/raw/belka.parquet | cut -f1)"
     echo "- vocab.txt: $(du -h data/raw/vocab.txt | cut -f1) ($(wc -l < data/raw/vocab.txt) tokens)"
     echo ""
     echo "⚡ Debug mode processed ~96K rows in ~30 seconds"
     echo "📝 For full production run: sbatch slurm/job_cpu_preprocess.sh"
     echo "=============================================="
     
+    # Log successful job completion
+    poetry run python scripts/slurm_utils.py --cluster-type cpu job-end "belka_preprocess_debug" --exit-code 0 --save-report
+    
 else
     echo "✗ DEBUG preprocessing failed with exit code $?"
     echo "Check logs/cpu_preprocess_debug_${SLURM_JOB_ID}.log for details"
+    
+    # Log failed job completion
+    poetry run python scripts/slurm_utils.py --cluster-type cpu job-end "belka_preprocess_debug" --exit-code $? --error-message "DEBUG preprocessing pipeline failed" --save-report
     exit 1
 fi
-
-echo "End time: $(date)"

@@ -34,10 +34,10 @@ case $VALIDATION_MODE in
         
         # Check if required files exist locally
         echo "Checking CPU preprocessing outputs..."
-        if [ ! -f "$DATA_DIR/belka.parquet" ] || [ ! -f "$DATA_DIR/vocab.txt" ]; then
+        if [ ! -d "$DATA_DIR/belka.parquet" ] || [ ! -f "$DATA_DIR/vocab.txt" ]; then
             echo "ERROR: Required preprocessing files not found"
             echo "Expected files:"
-            echo "  - $DATA_DIR/belka.parquet"
+            echo "  - $DATA_DIR/belka.parquet (directory)"
             echo "  - $DATA_DIR/vocab.txt"
             echo ""
             echo "CPU preprocessing must complete first. Run:"
@@ -53,20 +53,28 @@ case $VALIDATION_MODE in
         # Check if files exist and get information
         echo "Verifying required files exist..."
         for file in "${REQUIRED_FILES[@]}"; do
-            if [ ! -f "$DATA_DIR/$file" ]; then
-                echo "ERROR: Required file not found: $DATA_DIR/$file"
-                echo "CPU preprocessing may have failed"
-                exit 1
+            if [ "$file" = "belka.parquet" ]; then
+                if [ ! -d "$DATA_DIR/$file" ]; then
+                    echo "ERROR: Required directory not found: $DATA_DIR/$file"
+                    echo "CPU preprocessing may have failed"
+                    exit 1
+                fi
+            else
+                if [ ! -f "$DATA_DIR/$file" ]; then
+                    echo "ERROR: Required file not found: $DATA_DIR/$file"
+                    echo "CPU preprocessing may have failed"
+                    exit 1
+                fi
             fi
         done
         echo "✓ All required files found locally"
         
         # Verify basic file integrity (non-empty, readable)
         echo "Verifying file integrity..."
-        if [ -s "$DATA_DIR/belka.parquet" ] && [ -r "$DATA_DIR/belka.parquet" ]; then
-            echo "✓ belka.parquet is accessible and non-empty"
+        if [ -d "$DATA_DIR/belka.parquet" ] && [ -r "$DATA_DIR/belka.parquet" ]; then
+            echo "✓ belka.parquet directory is accessible"
         else
-            echo "✗ belka.parquet integrity check failed"
+            echo "✗ belka.parquet directory integrity check failed"
             exit 1
         fi
         
@@ -80,7 +88,7 @@ case $VALIDATION_MODE in
         # Display file information
         echo ""
         echo "File information:"
-        echo "- belka.parquet: $(du -h $DATA_DIR/belka.parquet | cut -f1)"
+        echo "- belka.parquet: $(du -sh $DATA_DIR/belka.parquet | cut -f1) (directory)"
         echo "- vocab.txt: $(du -h $DATA_DIR/vocab.txt | cut -f1) ($(wc -l < $DATA_DIR/vocab.txt) tokens)"
         
         echo ""

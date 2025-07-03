@@ -153,6 +153,8 @@ poetry run python scripts/pipeline.py --step preprocess --debug
 poetry run python scripts/pipeline.py --step preprocess
 ```
 
+**⚠️ Safety Note**: Preprocessing will fail if output files (`belka.parquet`, `vocab.txt`) already exist. Use `--force-clean` or manual cleanup if needed.
+
 ### 2. Train Model
 Creates the TFRecord dataset and trains the transformer in the specified mode:
 ```bash
@@ -163,6 +165,24 @@ poetry run python scripts/pipeline.py --step train --mode clf
 Creates a competition submission:
 ```bash
 poetry run python scripts/pipeline.py --step make_submission --model-path models/best_model.keras
+```
+
+### Utility Commands
+```bash
+# Check for existing output files
+poetry run python scripts/slurm_utils.py --cluster-type cpu clean --dry-run
+
+# Force cleanup of existing files (use with caution)
+poetry run python scripts/slurm_utils.py --cluster-type cpu clean --force-clean
+
+# Create required directories
+poetry run python scripts/slurm_utils.py --cluster-type cpu create-dirs
+
+# Validate input files
+poetry run python scripts/slurm_utils.py --cluster-type cpu validate-inputs
+
+# Monitor system resources
+poetry run python scripts/slurm_utils.py --cluster-type cpu monitor
 ```
 
 ## 🧪 Development & Debugging
@@ -212,6 +232,8 @@ sbatch slurm/job_cpu_preprocess.sh
 # Alternative: Environment variable debug mode
 DEBUG_MODE=true sbatch slurm/job_cpu_preprocess.sh
 ```
+
+**⚠️ Safety Note**: SLURM jobs will fail if output files (`belka.parquet`, `vocab.txt`) already exist. This prevents accidental data loss. See [Error Handling](#-error-handling) section for details.
 
 ## 🎯 Training Modes
 
@@ -271,12 +293,30 @@ sbatch slurm/job_gpu_training.sh
 ```
 
 **SLURM Resource Allocation:**
-- **Debug mode**: 2 CPUs, 4GB RAM, 10-minute limit
+- **Debug mode**: 8 CPUs, 64GB RAM, 10-minute limit
 - **Production mode**: 16 CPUs, 128GB RAM, no time limit
+
+**⚠️ Important**: SLURM jobs now include safety checks and will fail if output files already exist. This prevents accidental data loss in batch processing environments.
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
+
+#### SLURM Job Failures Due to Existing Files
+```bash
+# ❌ ERROR: Job fails with "Cleanup failed - existing output files detected"
+sbatch slurm/job_cpu_preprocess.sh
+
+# ✅ SOLUTION 1: Check what files exist
+poetry run python scripts/slurm_utils.py --cluster-type cpu clean --dry-run
+
+# ✅ SOLUTION 2: Force cleanup (CAUTION: deletes existing files)
+poetry run python scripts/slurm_utils.py --cluster-type cpu clean --force-clean
+
+# ✅ SOLUTION 3: Manual cleanup
+rm -f data/raw/belka.parquet data/raw/vocab.txt
+sbatch slurm/job_cpu_preprocess.sh
+```
 
 #### SLURM Script Path Errors
 ```bash
@@ -384,6 +424,49 @@ The pipeline includes comprehensive error handling:
 - **Checkpoint Recovery**: Resume training from saved checkpoints
 - **GPU Fallback**: Automatic CPU fallback if GPU fails
 - **Detailed Logging**: Comprehensive logging for debugging
+- **⚠️ Safety Checks**: Prevents accidental deletion of existing output files
+
+### Safety Check for Existing Files
+
+The pipeline now includes safety checks to prevent accidental deletion of processed data:
+
+```bash
+# ❌ This will ERROR OUT if belka.parquet or vocab.txt already exist
+poetry run python scripts/slurm_utils.py --cluster-type cpu clean
+
+# ✅ Preview what would be deleted without actually deleting
+poetry run python scripts/slurm_utils.py --cluster-type cpu clean --dry-run
+
+# ⚠️ Force deletion of existing files (use with caution)
+poetry run python scripts/slurm_utils.py --cluster-type cpu clean --force-clean
+```
+
+**Error Message Example:**
+```
+✗ Cannot proceed: Existing output files detected!
+Found files that would be overwritten:
+  • belka.parquet (1.2GB, modified: Mon Jul  3 15:30:45 2023)
+  • vocab.txt (2.1KB, modified: Mon Jul  3 15:28:12 2023)
+Use --force-clean flag to overwrite existing files.
+```
+
+### SLURM Job Behavior
+
+SLURM jobs will now fail cleanly with clear error messages if output files exist:
+
+```bash
+# These jobs will fail if output files exist
+sbatch slurm/job_cpu_preprocess.sh
+sbatch slurm/job_cpu_preprocess_debug.sh
+
+# Check SLURM logs for error details
+cat logs/cpu_preprocess_*.err
+```
+
+**Options when job fails:**
+1. **Manual cleanup**: Delete/backup files manually, then rerun
+2. **Force mode**: Modify scripts to use `--force-clean` flag
+3. **Dry run**: Check what would be deleted first
 
 ## 📊 Monitoring and Logging
 

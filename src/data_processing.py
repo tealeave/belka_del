@@ -28,6 +28,9 @@ from rdkit import Chem
 import atomInSmiles
 import gc
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 from typing import Dict, Tuple, Union, Optional, Set
 
 # Local application imports
